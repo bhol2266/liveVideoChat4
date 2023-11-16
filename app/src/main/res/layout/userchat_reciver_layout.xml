@@ -31,17 +31,41 @@
             android:layout_marginStart="1dp"
             android:orientation="vertical">
 
-            <TextView
-                android:id="@+id/textMsg"
+            <LinearLayout
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:background="@drawable/reciver_shape"
-                android:fontFamily="@font/inter"
-                android:padding="7dp"
-                android:text="message"
-                android:textColor="@color/gmts_light_gray"
-                android:textColorLink="@color/themeColor"
-                android:textSize="15dp" />
+                android:orientation="vertical">
+
+                <TextView
+                    android:id="@+id/textMsg"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:fontFamily="@font/inter"
+                    android:text="asdfsda"
+                    android:textColor="@color/gmts_light_gray"
+                    android:textColorLink="@color/themeColor"
+                    android:textSize="15dp" />
+
+                <View
+                    android:layout_width="match_parent"
+                    android:layout_height="2dp"
+                    android:layout_marginTop="5dp"
+                    android:layout_marginBottom="5dp"
+                    android:alpha="0.1"
+                    android:background="@color/gmts_light_gray" />
+
+
+                <TextView
+                    android:id="@+id/translatedMessage"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:fontFamily="@font/inter"
+                    android:text=""
+                    android:textColor="@color/gmts_light_gray"
+                    android:textColorLink="@color/themeColor"
+                    android:textSize="15dp" />
+
+            </LinearLayout>
 
             <FrameLayout
                 android:id="@+id/picMsgLayout"

@@ -7,17 +7,14 @@ import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Paint;
-import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
-import android.os.Environment;
 import android.util.Log;
 import android.view.View;
 import android.view.WindowManager;
 import android.widget.LinearLayout;
-import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -44,8 +41,6 @@ import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.Query;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.google.gson.Gson;
-import com.squareup.picasso.Picasso;
-import com.squareup.picasso.Target;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -54,9 +49,6 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
-import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 
 import javax.net.ssl.HttpsURLConnection;
 
@@ -182,7 +174,7 @@ public class LoginScreen extends AppCompatActivity {
                     }
                 });
             } catch (ApiException e) {
-                Log.d(SplashScreen.TAG, "onActivityResult: " + e.getMessage());
+                Log.d(SplashScreen.TAG, "onActivityResulttt: " + e.getMessage());
             }
         }
         super.onActivityResult(requestCode, resultCode, data);
@@ -203,14 +195,14 @@ public class LoginScreen extends AppCompatActivity {
                         // No user with the provided email address found and countinue to new login
                         LoginInComplete("Google", displayName, email, picUrl);
 
-                    } else {
 
+                    } else {
 
 
                         for (QueryDocumentSnapshot documentSnapshot : queryDocumentSnapshots) {
                             SplashScreen.userModel = documentSnapshot.toObject(UserModel.class); // Replace User with your actual user model class
-                            Utils utils=new Utils();
-                            utils.updateDateonFireStore("date", new java.util.Date());
+                            Utils utils = new Utils();
+                            utils.updateDateonFireStore("date", new Date());
 
                             // Use the user data as needed
                             Toast.makeText(this, "Welcome Back!", Toast.LENGTH_SHORT).show();
@@ -232,6 +224,9 @@ public class LoginScreen extends AppCompatActivity {
                             editor.putInt("coins", SplashScreen.userModel.getCoins());
                             editor.apply();
 
+                            Utils.replaceFCMToken();
+
+
                             dismissLoadingDialog();
                             if (SplashScreen.userModel.getGalleryImages().size() > 1) {
                                 saveGalleryImages(SplashScreen.userModel.getGalleryImages()); // save fallery images to local storeage from firebase storage
@@ -248,6 +243,8 @@ public class LoginScreen extends AppCompatActivity {
 
 
     }
+
+
 
     private void saveGalleryImages(final ArrayList<GalleryModel> galleryImages) {
 
@@ -378,7 +375,9 @@ class DownloadImageTask extends AsyncTask<ArrayList<GalleryModel>, Void, Void> {
     }
 }
 
-class UserModel {
+
+
+ class UserModel {
 
     String fullname, email, profilepic, loggedAs, selectedGender, birthday, location, language, bio, intrestedIn;
     boolean streamer;
@@ -387,12 +386,13 @@ class UserModel {
     Date date;
     String memberShipExpiryDate;
     ArrayList<GalleryModel> galleryImages;
-
+    private String fcmToken;
+    boolean banned;
 
     public UserModel() {
     }
 
-    public UserModel(String fullname, String email, String profilepic, String loggedAs, String selectedGender, String birthday, String location, String language, String bio, String intrestedIn, boolean streamer, int coins, int userId, Date date, String memberShipExpiryDate, ArrayList<GalleryModel> galleryImages) {
+    public UserModel(String fullname, String email, String profilepic, String loggedAs, String selectedGender, String birthday, String location, String language, String bio, String intrestedIn, boolean streamer, int coins, int userId, Date date, String memberShipExpiryDate, ArrayList<GalleryModel> galleryImages, String fcmToken, boolean banned) {
         this.fullname = fullname;
         this.email = email;
         this.profilepic = profilepic;
@@ -409,6 +409,8 @@ class UserModel {
         this.date = date;
         this.memberShipExpiryDate = memberShipExpiryDate;
         this.galleryImages = galleryImages;
+        this.fcmToken = fcmToken;
+        this.banned = banned;
     }
 
     public String getFullname() {
@@ -537,5 +539,21 @@ class UserModel {
 
     public void setGalleryImages(ArrayList<GalleryModel> galleryImages) {
         this.galleryImages = galleryImages;
+    }
+
+    public String getFcmToken() {
+        return fcmToken;
+    }
+
+    public void setFcmToken(String fcmToken) {
+        this.fcmToken = fcmToken;
+    }
+
+    public boolean isBanned() {
+        return banned;
+    }
+
+    public void setBanned(boolean banned) {
+        this.banned = banned;
     }
 }

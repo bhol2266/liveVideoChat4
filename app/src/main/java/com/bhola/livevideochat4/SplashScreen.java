@@ -52,6 +52,7 @@ import org.json.JSONObject;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -122,7 +123,6 @@ public class SplashScreen extends AppCompatActivity {
         } catch (Exception e) {
             e.printStackTrace();
         }
-        sharedPrefrences();
 
         countryList = loadCountryListFromAsset(this, "countrylist.json");
 
@@ -234,9 +234,7 @@ public class SplashScreen extends AppCompatActivity {
                     databaseURL_images = (String) snapshot.child("databaseURL_images").getValue();
 
 
-                    if (animationCompleted) {
-                        handler_forIntent();
-                    }
+                    sharedPrefrences();
 
 
                 }
@@ -293,17 +291,23 @@ public class SplashScreen extends AppCompatActivity {
                         userModel = documentSnapshot.toObject(UserModel.class);
                         // Use the user data
                         //update user latest login date
-                        Utils utils=new Utils();
-                        utils.updateDateonFireStore("date", new java.util.Date());
-
+                        Utils utils = new Utils();
+                        utils.updateDateonFireStore("date", new Date());
+                        if (animationCompleted) {
+                            handler_forIntent();
+                        }
                     } else {
+
+                        SplashScreen.userLoggedIn=false;
+                        if (animationCompleted) {
+                            handler_forIntent();
+                        }
                         // User document doesn't exist
                     }
                 })
                 .addOnFailureListener(e -> {
                     // Handle the error
                 });
-
 
 
     }

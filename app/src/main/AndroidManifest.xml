@@ -64,6 +64,9 @@
             android:name=".About"
             android:exported="false" />
         <activity
+            android:name=".AdminPanel_Userlist"
+            android:exported="false" />
+        <activity
             android:name=".Video"
             android:exported="false" />
         <activity

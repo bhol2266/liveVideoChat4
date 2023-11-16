@@ -515,6 +515,7 @@ public class VipMembership extends AppCompatActivity {
         String dateString = dateFormat.format(currentDate);
         myEdit.putString("purchase_date", dateString);
         myEdit.commit();
+        FirebaseUtil.addUserCoins(coins);
 
     }
 

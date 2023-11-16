@@ -6,6 +6,7 @@ import android.app.FragmentManager;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.graphics.Bitmap;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.InsetDrawable;
@@ -50,6 +51,7 @@ import com.squareup.picasso.Picasso;
 import com.theartofdev.edmodo.cropper.CropImage;
 import com.theartofdev.edmodo.cropper.CropImageView;
 
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -293,7 +295,6 @@ public class UserProfileEdit extends AppCompatActivity {
             if (Gender.equals("female")) {
                 profileImage.setImageResource(R.drawable.female_logo);
             }
-
         }
         LinearLayout profileImageLayout = findViewById(R.id.profileImageLayout);
         profileImageLayout.setOnClickListener(new View.OnClickListener() {
@@ -348,13 +349,16 @@ public class UserProfileEdit extends AppCompatActivity {
                     File destinationFile = new File(internalStorage, System.currentTimeMillis() + ".jpg");
                     Uri copiedImageUri = Uri.fromFile(destinationFile);
 
-
                     try {
                         saveCroppedImage(croppedImageUri.getPath(), destinationFile.getPath());
                     } catch (IOException e) {
                     }
 
-                    uploadImagetoFirebaseStorageGallery(copiedImageUri);
+                    try {
+                        uploadImagetoFirebaseStorageGallery(copiedImageUri);
+                    } catch (IOException e) {
+                        throw new RuntimeException(e);
+                    }
 
 
                 } else {
@@ -365,7 +369,11 @@ public class UserProfileEdit extends AppCompatActivity {
                     try {
                         saveCroppedImage(croppedImageUri.getPath(), destinationFile.getPath());
                     } catch (IOException e) {
+                        Log.d("onBindViewHolder", "onActivityResult: "+e.getMessage());
                     }
+                    //Resize image
+
+
 
                     uploadImagetoFirebaseStorageProfile(copiedImageUri, "Users/" + String.valueOf(SplashScreen.userModel.getUserId()) + "/profile.jpg");
 
@@ -378,7 +386,9 @@ public class UserProfileEdit extends AppCompatActivity {
         }
     }
 
-    private void uploadImagetoFirebaseStorageGallery(Uri croppedImageUri) {
+    private void uploadImagetoFirebaseStorageGallery(Uri croppedImageUri) throws IOException {
+
+
         Utils utils = new Utils();
         utils.showLoadingDialog(UserProfileEdit.this, "Uploading...");
         StorageReference storageReference = FirebaseStorage.getInstance().getReference();
@@ -388,15 +398,26 @@ public class UserProfileEdit extends AppCompatActivity {
         String path = "Users/" + String.valueOf(SplashScreen.userModel.getUserId()) + "/gallery/" + currentTimeString + ".jpg";
         StorageReference imageRef = storageReference.child(path);
 
+
+        int orientation = ImageResizer.getImageOrientation(croppedImageUri,UserProfileEdit.this);
+        Bitmap bitmap=ImageResizer.imageURItoBitmap(croppedImageUri,UserProfileEdit.this);
+        Bitmap rotatedBitmap = ImageResizer.rotateBitmap(bitmap, orientation);
+
+        Bitmap redusedBitmap = ImageResizer.reduceBitmapSize(rotatedBitmap, 400000);
+
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        redusedBitmap.compress(Bitmap.CompressFormat.JPEG, 100, baos);
+        byte[] data = baos.toByteArray();
+
+
 // Upload the file to Firebase Storage
-        imageRef.putFile(croppedImageUri)
+        imageRef.putBytes(data)
                 .addOnSuccessListener(taskSnapshot -> {
                     // File uploaded successfully
                     imageRef.getDownloadUrl().addOnSuccessListener(uri -> {
                         String downloadUrl = uri.toString();
 
-
-                        GalleryModel galleryModel = new GalleryModel(downloadUrl, croppedImageUri.toString(), path,currentTimeString + ".jpg");
+                        GalleryModel galleryModel = new GalleryModel(downloadUrl, croppedImageUri.toString(), path, currentTimeString + ".jpg");
 
                         galleryImages.add(1, galleryModel);
                         galleryImageAdapter.notifyItemInserted(1);
@@ -405,7 +426,6 @@ public class UserProfileEdit extends AppCompatActivity {
 
                         save_userInfo_gallery(UserProfileEdit.this, galleryImages);
                         utils.dismissLoadingDialog();
-
                     });
                 })
                 .addOnFailureListener(e -> {
@@ -437,11 +457,22 @@ public class UserProfileEdit extends AppCompatActivity {
         utils.showLoadingDialog(UserProfileEdit.this, "Uploading...");
         StorageReference storageReference = FirebaseStorage.getInstance().getReference();
 
+        int orientation = ImageResizer.getImageOrientation(croppedImageUri,UserProfileEdit.this);
+        Bitmap bitmap=ImageResizer.imageURItoBitmap(croppedImageUri,UserProfileEdit.this);
+        Bitmap rotatedBitmap = ImageResizer.rotateBitmap(bitmap, orientation);
+
+        Bitmap redusedBitmap = ImageResizer.reduceBitmapSize(rotatedBitmap, 400000);
+
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        redusedBitmap.compress(Bitmap.CompressFormat.JPEG, 100, baos);
+        byte[] data = baos.toByteArray();
+
+
 
         StorageReference imageRef = storageReference.child(path);
 
 // Upload the file to Firebase Storage
-        imageRef.putFile(croppedImageUri)
+        imageRef.putBytes(data)
                 .addOnSuccessListener(taskSnapshot -> {
                     // File uploaded successfully
                     imageRef.getDownloadUrl().addOnSuccessListener(uri -> {
@@ -449,6 +480,13 @@ public class UserProfileEdit extends AppCompatActivity {
 
                         profileImage.setImageURI(croppedImageUri);
                         photoUrl = downloadUrl;
+
+                        try {
+                            new Utils().downloadProfile_andGetURI(photoUrl,UserProfileEdit.this);
+                        } catch (IOException e) {
+                            Log.d("SpaceError", "saveProfileDetails: "+e.getMessage());
+                        }
+
                         new Utils().updateProfileonFireStore("profilepic",photoUrl);
 
                         save_userInfo_alldetails();
@@ -482,6 +520,7 @@ public class UserProfileEdit extends AppCompatActivity {
 
 
     public static void save_userInfo_gallery(Context context, List<GalleryModel> itemList) {
+
         SharedPreferences sharedPreferences = context.getSharedPreferences("UserInfo", MODE_PRIVATE);
         SharedPreferences.Editor editor = sharedPreferences.edit();
         Gson gson = new Gson();
@@ -761,6 +800,8 @@ class GalleryImageAdapter extends RecyclerView.Adapter<GalleryImageAdapter.Image
                     imageList.remove(i);
                     notifyItemRemoved(i);
                     UserProfileEdit.save_userInfo_gallery(context, imageList);
+
+                    updateOnFirestore(imageList);
                     Toast.makeText(context, "Deleted Successfully", Toast.LENGTH_SHORT).show();
                     utils.dismissLoadingDialog();
 
@@ -772,6 +813,26 @@ class GalleryImageAdapter extends RecyclerView.Adapter<GalleryImageAdapter.Image
                 });
 
 
+    }
+
+    private void updateOnFirestore(List<GalleryModel> imageList) {
+
+
+        FirebaseFirestore db = FirebaseFirestore.getInstance();
+        CollectionReference usersRef = db.collection("Users");
+        String userId = String.valueOf(SplashScreen.userModel.getUserId()); // Replace with the actual user ID
+        DocumentReference userDocRef = usersRef.document(userId);
+
+        Map<String, Object> updates = new HashMap<>();
+        updates.put("galleryImages", imageList);
+
+        userDocRef.update(updates)
+                .addOnSuccessListener(aVoid -> {
+                    // The field(s) were successfully updated
+                })
+                .addOnFailureListener(e -> {
+                    // Handle any errors that might occur during the update
+                });
     }
 
 
@@ -795,5 +856,4 @@ class GalleryImageAdapter extends RecyclerView.Adapter<GalleryImageAdapter.Image
 
 
 }
-
 

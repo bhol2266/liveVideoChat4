@@ -63,6 +63,7 @@ import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 import com.google.android.material.bottomsheet.BottomSheetDialog;
+
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
@@ -116,10 +117,24 @@ public class ChatScreen_User extends Activity {
             showAds();
         }
 
+        initGoogleTranslator();
         getModalClass();
         bottomBtns();
 
 
+    }
+
+    private void initGoogleTranslator() {
+//        String apiUrl = "http://localhost:5000/languageTranslate";
+        String apiUrl = "https://clownfish-app-jn7w9.ondigitalocean.app/languageTranslate";
+
+        String text = "Hello, how are you?";
+        String langCode = "hi";
+//        LanguageTranslateAPI.postData(ChatScreen_User.this, text, langCode);
+
+        // Initialize the client
+//        String API_KEY="AIzaSyDUjBgXQ-BpF3PNbJE1i-rr0-qhDwFDBIE";
+//         translate= TranslateOptions.newBuilder().setApiKey(API_KEY).build().getService();
     }
 
     private void getModalClass() {
@@ -1389,6 +1404,7 @@ class ChatsAdapter extends RecyclerView.Adapter {
                 reciverViewHolder.textMsg.setText(chats.getMessage());
                 reciverViewHolder.picMsgLayout.setVisibility(View.GONE);
                 reciverViewHolder.audioMsg.setVisibility(View.GONE);
+                translateMessage(chats.getMessage(), reciverViewHolder.translatedMessage);
             }
             if (chats.getMessageType().equals("mimeType/audio")) {
                 reciverViewHolder.picMsgLayout.setVisibility(View.GONE);
@@ -1639,6 +1655,11 @@ class ChatsAdapter extends RecyclerView.Adapter {
 
     }
 
+    private void translateMessage(String message, TextView translatedMessage) {
+        LanguageTranslateAPI.postData(context, message, "hi",translatedMessage);
+
+    }
+
     private Bitmap checkOrientation(Uri imageUri) {
 
         InputStream inputStream = null;
@@ -1656,7 +1677,7 @@ class ChatsAdapter extends RecyclerView.Adapter {
     }
 
     private void updateErrorIcon(FrameLayout errorLayout, ImageView errorIcon, String chatType) {
-        if (!chatType.equals("premium") || SplashScreen.coins >0) {
+        if (!chatType.equals("premium") || SplashScreen.coins > 0) {
             errorLayout.setVisibility(View.GONE);
         }
         new Handler().postDelayed(new Runnable() {
@@ -1721,7 +1742,7 @@ class ChatsAdapter extends RecyclerView.Adapter {
     }
 
     static class ReciverViewHolder extends RecyclerView.ViewHolder {
-        TextView textMsg, timeStamp;
+        TextView textMsg, translatedMessage, timeStamp;
         ImageView picMsg, profileImage;
         CardView audioMsg;
         FrameLayout picMsgLayout;
@@ -1739,6 +1760,7 @@ class ChatsAdapter extends RecyclerView.Adapter {
             picMsgLayout = itemView.findViewById(R.id.picMsgLayout);
             playAudiolottie = itemView.findViewById(R.id.playAudiolottie);
             audioProgressBar = itemView.findViewById(R.id.audioProgressBar);
+            translatedMessage = itemView.findViewById(R.id.translatedMessage);
 
         }
     }

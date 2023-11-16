@@ -192,6 +192,21 @@
             android:orientation="horizontal">
 
 
+
+
+            <Button
+                android:id="@+id/GotoUserlist"
+                android:layout_width="0dp"
+                android:layout_height="70dp"
+                android:layout_gravity="center_vertical"
+                android:layout_margin="20dp"
+                android:layout_weight="1"
+                android:gravity="center"
+                android:text="Userlist"
+                android:textSize="12dp"
+
+                />
+
             <Button
                 android:id="@+id/Ad_Network"
                 android:layout_width="0dp"
