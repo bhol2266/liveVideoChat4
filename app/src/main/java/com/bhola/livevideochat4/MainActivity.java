@@ -25,6 +25,8 @@ import androidx.core.view.WindowInsetsCompat;
 import androidx.core.view.WindowInsetsControllerCompat;
 import androidx.viewpager2.widget.ViewPager2;
 
+import com.bhola.livevideochat4.Models.ChatItem_ModelClass;
+import com.bhola.livevideochat4.Models.UserBotMsg;
 import com.google.android.material.tabs.TabLayout;
 import com.google.android.material.tabs.TabLayoutMediator;
 import com.google.common.reflect.TypeToken;
@@ -40,13 +42,18 @@ public class MainActivity extends AppCompatActivity {
     public static int unreadMessage_count;
     public static ViewPager2 viewPager2;
     com.facebook.ads.InterstitialAd facebook_IntertitialAds;
+    private InAppUpdate inAppUpdate;
 
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        getWindow().setFlags(WindowManager.LayoutParams.FLAG_SECURE, WindowManager.LayoutParams.FLAG_SECURE);
+
 //        fullscreenMode();
+        checkForupdate();
+
 
 
         if (SplashScreen.Ads_State.equals("active")) {
@@ -243,6 +250,12 @@ public class MainActivity extends AppCompatActivity {
         if (SplashScreen.Ads_State.equals("active")) {
             showAds();
         }
+    }
+
+    private void checkForupdate() {
+        inAppUpdate = new InAppUpdate(MainActivity.this);
+        inAppUpdate.checkForAppUpdate();
+
     }
 
     private void exit_dialog() {

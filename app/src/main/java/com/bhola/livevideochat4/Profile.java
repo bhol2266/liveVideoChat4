@@ -37,6 +37,7 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.airbnb.lottie.LottieAnimationView;
 import com.bhola.Models.GiftItemModel;
+import com.bhola.livevideochat4.Models.ChatItem_ModelClass;
 import com.bhola.livevideochat4.Models.Model_Profile;
 import com.google.android.material.bottomsheet.BottomSheetDialog;
 import com.squareup.picasso.Picasso;
@@ -55,7 +56,7 @@ public class Profile extends AppCompatActivity {
     GridLayout gridLayout;
     Model_Profile model_profile;
     public static TextView send;
-
+    boolean isOnline;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -263,9 +264,11 @@ public class Profile extends AppCompatActivity {
                 SharedPreferences sharedPreferences = view.getContext().getSharedPreferences("UserInfo", MODE_PRIVATE);
                 SharedPreferences.Editor editor = sharedPreferences.edit();
                 editor.putString("userName", model_profile.getUsername());
+
                 editor.apply(); // Apply the changes to SharedPreferences
 
                 Intent intent = new Intent(Profile.this, ChatScreen_User.class);
+                intent.putExtra("online", isOnline);
                 startActivity(intent);
             }
         });
@@ -328,7 +331,7 @@ public class Profile extends AppCompatActivity {
         }
 
         LinearLayout onlineLayout = findViewById(R.id.onlineLayout);
-        boolean isOnline = getIntent().getBooleanExtra("online", false);
+         isOnline = getIntent().getBooleanExtra("online", false);
         if (isOnline) {
             onlineLayout.setVisibility(View.VISIBLE);
         }

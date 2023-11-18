@@ -53,6 +53,7 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
+import com.bhola.livevideochat4.Models.CountryInfo_Model;
 import com.bhola.livevideochat4.Models.Model_Profile;
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationServices;
@@ -562,7 +563,7 @@ public class Fragment_Trending extends Fragment {
     private void updateLocationFireStore() {
         FirebaseFirestore db = FirebaseFirestore.getInstance();
         CollectionReference usersRef = db.collection("Users");
-        String userId = String.valueOf(SplashScreen.userModel.getUserId()); // Replace with the actual user ID
+        String userId = String.valueOf(SplashScreen.userModel.getUserId());
         DocumentReference userDocRef = usersRef.document(userId);
 
         Map<String, Object> updates = new HashMap<>();

@@ -1,7 +1,5 @@
 package com.bhola.livevideochat4;
 
-import static android.content.Context.MODE_PRIVATE;
-
 import android.Manifest;
 import android.app.Activity;
 import android.app.FragmentManager;
@@ -16,7 +14,6 @@ import android.graphics.Color;
 import android.graphics.Matrix;
 import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.InsetDrawable;
-import android.media.AudioAttributes;
 import android.media.ExifInterface;
 import android.media.MediaPlayer;
 import android.net.Uri;
@@ -27,16 +24,12 @@ import android.os.Handler;
 import android.provider.MediaStore;
 import android.text.Editable;
 import android.text.TextWatcher;
-import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
-import android.view.ViewGroup;
 import android.widget.EditText;
-import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
-import android.widget.ProgressBar;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -52,19 +45,28 @@ import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.airbnb.lottie.LottieAnimationView;
 import com.bhola.Models.GiftItemModel;
+import com.bhola.livevideochat4.Models.ChatItem_ModelClass;
+import com.bhola.livevideochat4.Models.Chats_Modelclass;
+import com.bhola.livevideochat4.Models.CountryInfo_Model;
 import com.bhola.livevideochat4.Models.Model_Profile;
+import com.bhola.livevideochat4.Models.UserBotMsg;
+import com.bhola.livevideochat4.Models.UserQuestionWithAns;
+import com.bhola.livevideochat4.adapters.ChatsAdapter;
 import com.devlomi.record_view.OnBasketAnimationEnd;
 import com.devlomi.record_view.OnRecordListener;
 import com.devlomi.record_view.RecordButton;
 import com.devlomi.record_view.RecordView;
 import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 import com.google.android.material.bottomsheet.BottomSheetDialog;
-
 import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.ml.naturallanguage.FirebaseNaturalLanguage;
+import com.google.firebase.ml.naturallanguage.smartreply.FirebaseSmartReply;
+import com.google.firebase.ml.naturallanguage.smartreply.FirebaseTextMessage;
+import com.google.firebase.ml.naturallanguage.smartreply.SmartReplySuggestionResult;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
@@ -82,9 +84,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Random;
 import java.util.UUID;
-
-import de.hdodenhof.circleimageview.CircleImageView;
 
 public class ChatScreen_User extends Activity {
 
@@ -107,6 +108,8 @@ public class ChatScreen_User extends Activity {
     // voice message stuffs
     private AudioRecorder audioRecorder;
     private File recordFile;
+    public static ArrayList<FirebaseTextMessage> conversation;
+    boolean isOnline;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -117,24 +120,10 @@ public class ChatScreen_User extends Activity {
             showAds();
         }
 
-        initGoogleTranslator();
         getModalClass();
         bottomBtns();
 
 
-    }
-
-    private void initGoogleTranslator() {
-//        String apiUrl = "http://localhost:5000/languageTranslate";
-        String apiUrl = "https://clownfish-app-jn7w9.ondigitalocean.app/languageTranslate";
-
-        String text = "Hello, how are you?";
-        String langCode = "hi";
-//        LanguageTranslateAPI.postData(ChatScreen_User.this, text, langCode);
-
-        // Initialize the client
-//        String API_KEY="AIzaSyDUjBgXQ-BpF3PNbJE1i-rr0-qhDwFDBIE";
-//         translate= TranslateOptions.newBuilder().setApiKey(API_KEY).build().getService();
     }
 
     private void getModalClass() {
@@ -161,6 +150,83 @@ public class ChatScreen_User extends Activity {
 
     }
 
+    private void sendDataRecyclerview() {
+        actionbar();// this is because when user clicks on hello image direclty , than we have to read username data from db which takes time than we call actionbar();
+
+        chatsArrayList = new ArrayList<Chats_Modelclass>();
+
+        if (modelClass.isContainsQuestion()) {
+
+            UserQuestionWithAns userQuestionWithAns = modelClass.getQuestionWithAns();
+            Chats_Modelclass chats_modelclass = new Chats_Modelclass(userQuestionWithAns.getQuestion(), "mimeType/text", "", "", modelClass.getProfileImage(), userQuestionWithAns.getDateTime(), 2);
+            chatsArrayList.add(chats_modelclass);
+
+            if (modelClass.getQuestionWithAns().getRead() == 0) {
+                modelClass.getQuestionWithAns().setRead(1);
+            }
+
+            if (userQuestionWithAns.getReply().length() == 0) {
+                //not replied yet
+                setAnwswerOptions(userQuestionWithAns);
+            } else {
+
+                //adding reply message  only
+                Chats_Modelclass chats_modelclass2 = new Chats_Modelclass(userQuestionWithAns.getReply(), "mimeType/text", "", "free", modelClass.getProfileImage(), userQuestionWithAns.getDateTime(),1 );
+                chatsArrayList.add(chats_modelclass2);
+
+                //after reply message is added, add all remainig replies which is sent already
+                for (int i = 0; i < modelClass.getQuestionWithAns().getReplyToUser().size(); i++) {
+                    UserBotMsg userBotMsg = modelClass.getQuestionWithAns().getReplyToUser().get(i);
+                    if (userBotMsg.getSent() == 1) {
+                        Chats_Modelclass chats_modelclass3 = new Chats_Modelclass(userBotMsg.getMsg(), userBotMsg.getMimeType(), userBotMsg.getExtraMsg(), userBotMsg.getMessageType(), modelClass.getProfileImage(), userBotMsg.getDateTime(), userBotMsg.getViewType());
+                        chatsArrayList.add(chats_modelclass3);
+
+                        modelClass.getQuestionWithAns().getReplyToUser().get(i).setRead(1);
+                        update_userListTemp();
+
+                    }
+                }
+            }
+
+
+        } else {
+            for (int i = 0; i < modelClass.getUserBotMsg().size(); i++) {
+                if (modelClass.getUserBotMsg().get(i).getSent() == 1) {
+                    UserBotMsg userBotMsg = modelClass.getUserBotMsg().get(i);
+                    Chats_Modelclass chats_modelclass3 = new Chats_Modelclass(userBotMsg.getMsg(), userBotMsg.getMimeType(), userBotMsg.getExtraMsg(), userBotMsg.getMessageType(), modelClass.getProfileImage(), userBotMsg.getDateTime(), userBotMsg.getViewType());
+                    chatsArrayList.add(chats_modelclass3);
+
+                    if (modelClass.getUserBotMsg().get(i).getRead() == 0) {
+                        modelClass.getUserBotMsg().get(i).setRead(1);
+
+                        for (int j = 0; j < Fragment_Messenger.adapter.userList.size(); j++) {
+                            if (Fragment_Messenger.adapter.userList.get(j).getUsername().equals(modelClass.getUsername())) {
+                                Fragment_Messenger.adapter.userList.get(j).getUserBotMsg().get(i).setRead(1);
+                                Fragment_Messenger.save_sharedPrefrence(ChatScreen_User.this, Fragment_Messenger.adapter.userList);
+
+                            }
+                        }
+
+                    }
+                }
+            }
+        }
+
+        recylerview = findViewById(R.id.recylerview);
+
+
+        LinearLayoutManager linearLayoutManager = new LinearLayoutManager(ChatScreen_User.this);
+        linearLayoutManager.setStackFromEnd(true);
+        recylerview.setLayoutManager(linearLayoutManager);
+        chatAdapter = new ChatsAdapter(ChatScreen_User.this, chatsArrayList, recylerview, mediaPlayer, modelClass);
+        recylerview.setAdapter(chatAdapter);
+
+        scrollrecycelrvewToBottom();
+        load_UnsentMessage();
+
+    }
+
+
     private void createChatbot(Model_Profile modelProfile) {
         //create chatbot for this username and insert into Fragment_Messenger.adapter.userList
 
@@ -186,8 +252,11 @@ public class ChatScreen_User extends Activity {
         ArrayList<UserBotMsg> userBotMsgList = new ArrayList<>();
         Date currentTime = new Date();
 
-        UserBotMsg userBotMsg = new UserBotMsg("hi", "mimeType/text", "hi", String.valueOf(currentTime.getTime()), 5555, 1, 1);
+        UserBotMsg userBotMsg = new UserBotMsg("hi", "mimeType/text", "hi", String.valueOf(currentTime.getTime()), 0, 1, 1,"free",1);
         userBotMsgList.add(userBotMsg);
+        if (isOnline) {
+            smartReply("hi");
+        }
 
 
         UserQuestionWithAns questionWithAns = null;
@@ -231,16 +300,8 @@ public class ChatScreen_User extends Activity {
     }
 
 
-    private void showAds() {
-        if (SplashScreen.Ad_Network_Name.equals("admob")) {
-            ADS_ADMOB.Interstitial_Ad(this);
-        } else {
-            com.facebook.ads.InterstitialAd facebook_IntertitialAds = null;
-            ADS_FACEBOOK.interstitialAd(this, facebook_IntertitialAds, getString(R.string.Facebook_InterstitialAdUnit));
-        }
-    }
-
     private void bottomBtns() {
+        conversation = new ArrayList<>();
 
         EditText newMessage = findViewById(R.id.newMessage);
         newMessage.addTextChangedListener(new TextWatcher() {
@@ -280,7 +341,10 @@ public class ChatScreen_User extends Activity {
                 }
                 MediaPlayer mediaPlayer = MediaPlayer.create(ChatScreen_User.this, R.raw.msg_sent_sound);
                 mediaPlayer.start();
-                insertCustomMsginChats(msg, "mimeType/text", "premium"); //this function handles the custom msg from user and updates the userlistTemp and all
+                boolean freelimit = checkFreeLimit();
+                insertCustomMsginChats(msg, "mimeType/text", freelimit ? "" : "premium", 1, freelimit); //this function handles the custom msg from user and updates the userlistTemp and all
+
+                if (freelimit) smartReply(msg);
                 newMessage.setText("");
             }
         });
@@ -324,6 +388,200 @@ public class ChatScreen_User extends Activity {
             ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.RECORD_AUDIO}, 123);
         }
     }
+
+    private boolean checkFreeLimit() {
+        int count = 0;
+
+        if (modelClass.isContainsQuestion()) {
+            for (int i = 0; i < modelClass.getQuestionWithAns().getReplyToUser().size(); i++) {
+                UserBotMsg userBotMsg = modelClass.getQuestionWithAns().getReplyToUser().get(i);
+                if (userBotMsg.getViewType() == 1) {
+                    count = count + 1;
+                }
+            }
+        } else {
+
+            for (int i = 0; i < modelClass.getUserBotMsg().size(); i++) {
+                UserBotMsg userBotMsg = modelClass.getUserBotMsg().get(i);
+                if (userBotMsg.getViewType() == 1) {
+                    count = count + 1;
+                }
+            }
+        }
+        Log.d("wdsfafdsa", "checkFreeLimit: " + count);
+        if (count < 4) {
+            return true;
+        } else {
+            return false;
+        }
+
+    }
+
+    private void insertCustomMsginChats(String msg, String messageType, String chatType, int viewType, boolean freeLimt) {
+
+        MediaPlayer mediaPlayer = MediaPlayer.create(ChatScreen_User.this, R.raw.msg_sent_sound);
+        mediaPlayer.start();
+
+        Date currentTime = new Date();
+        scrollrecycelrvewToBottom();
+        Chats_Modelclass chats_modelclass = null;
+        if (messageType.equals("mimeType/text")) {
+            chats_modelclass = new Chats_Modelclass(msg, messageType, freeLimt ? "hi" : "", chatType, modelClass.getProfileImage(), String.valueOf(currentTime.getTime()), viewType);
+
+        }
+        if (messageType.equals("mimeType/image")) {
+            chats_modelclass = new Chats_Modelclass("[Image]", messageType, msg, chatType, modelClass.getProfileImage(), String.valueOf(currentTime.getTime()), viewType);
+
+        }
+        if (messageType.equals("mimeType/audio")) {
+            chats_modelclass = new Chats_Modelclass("[Audio]", messageType, msg, chatType, modelClass.getProfileImage(), String.valueOf(currentTime.getTime()), viewType);
+
+        }
+        chatsArrayList.add(chats_modelclass);
+        chatAdapter.notifyItemInserted(chatsArrayList.size() - 1);
+
+
+        int index = -1;
+        for (int i = 0; i < Fragment_Messenger.adapter.userList.size(); i++) {
+
+            if (Fragment_Messenger.adapter.userList.get(i).getUsername().equals(modelClass.getUsername())) {
+                index = i;
+                UserBotMsg userBotMsg1 = new UserBotMsg();
+                userBotMsg1.setDateTime(String.valueOf(currentTime.getTime()));
+                userBotMsg1.setRead(1);
+                userBotMsg1.setSent(1);
+                userBotMsg1.setMimeType(messageType);
+                userBotMsg1.setViewType(viewType);
+                userBotMsg1.setMessageType(chatType);
+                userBotMsg1.setNextMsgDelay(0);
+
+
+                if (messageType.equals("mimeType/text")) {
+                    userBotMsg1.setMsg(msg);
+                    userBotMsg1.setExtraMsg("");
+
+                } else {
+                    if (messageType.equals("mimeType/image")) {
+                        userBotMsg1.setMsg("[Image]");
+                    } else {
+                        userBotMsg1.setMsg("[Audio]");
+                    }
+                    userBotMsg1.setExtraMsg(msg);
+                }
+
+
+                ArrayList<UserBotMsg> temp = new ArrayList<>();
+
+                if (modelClass.isContainsQuestion()) {
+
+                    temp.addAll(modelClass.getQuestionWithAns().getReplyToUser());
+                    for (int j = 0; j < modelClass.getQuestionWithAns().getReplyToUser().size(); j++) {
+                        if (modelClass.getQuestionWithAns().getReplyToUser().get(j).getSent() == 0) {
+                            if (j == 0) {
+                                //first loop
+                                temp.add(0, userBotMsg1);
+                                break;
+                            } else {
+                                //middleloop
+                                temp.add(j, userBotMsg1);
+                                break;
+                            }
+                        }
+                        if (j == modelClass.getQuestionWithAns().getReplyToUser().size() - 1) {
+                            //last loop
+                            temp.add(userBotMsg1);
+                        }
+                    }
+
+                    modelClass.getQuestionWithAns().setReplyToUser(temp);
+                } else {
+                    temp.addAll(modelClass.getUserBotMsg());
+                    for (int j = 0; j < modelClass.getUserBotMsg().size(); j++) {
+                        if (modelClass.getUserBotMsg().get(j).getSent() == 0) {
+                            if (j == 0) {
+                                //first loop
+                                temp.add(0, userBotMsg1);
+                                break;
+                            } else {
+                                //middleloop
+                                temp.add(j, userBotMsg1);
+                                break;
+                            }
+                        }
+
+                        if (j == modelClass.getUserBotMsg().size() - 1) {
+                            //last loop
+                            temp.add(userBotMsg1);
+                        }
+
+                    }
+                    modelClass.setUserBotMsg(temp);
+                }
+
+            }
+
+        }
+
+
+        chatAdapter.notifyDataSetChanged();
+        update_userListTemp();
+
+
+        Fragment_Messenger.adapter.userList.remove(index);
+        Fragment_Messenger.adapter.userList.add(0, modelClass);
+        Fragment_Messenger.adapter.notifyItemMoved(index, 0);
+        Fragment_Messenger.adapter.notifyItemChanged(0);
+
+        Fragment_Messenger.save_sharedPrefrence(ChatScreen_User.this, Fragment_Messenger.adapter.userList);
+
+    }
+
+    private void smartReply(String msg) {
+
+        Random random = new Random();
+        int randomNumber = random.nextInt(10 - 5) + 5;
+        conversation.clear();
+        conversation.add(FirebaseTextMessage.createForRemoteUser(
+                msg, System.currentTimeMillis(), "sadfsadf"));
+        new Handler().postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                FirebaseSmartReply smartReply = FirebaseNaturalLanguage.getInstance().getSmartReply();
+                smartReply.suggestReplies(conversation)
+                        .addOnSuccessListener(new OnSuccessListener<SmartReplySuggestionResult>() {
+                            @Override
+                            public void onSuccess(SmartReplySuggestionResult result) {
+                                if (result.getStatus() == SmartReplySuggestionResult.STATUS_NOT_SUPPORTED_LANGUAGE) {
+                                    // The conversation's language isn't supported, so the
+                                    // the result doesn't contain any suggestions.
+                                    Log.d("wdsfafdsa", "STATUS_NOT_SUPPORTED_LANGUAGE: ");
+
+                                } else if (result.getStatus() == SmartReplySuggestionResult.STATUS_SUCCESS) {
+                                    Random random = new Random();
+                                    int randomNumber = random.nextInt(3);
+                                    try {
+
+                                        insertCustomMsginChats(result.getSuggestions().get(randomNumber).getText().toString(), "mimeType/text", "free", 2, true);
+                                    } catch (Exception e) {
+                                        Log.d("wdsfafdsa", "Exception: " + e.getMessage());
+                                    }
+
+                                }
+                            }
+                        })
+                        .addOnFailureListener(new OnFailureListener() {
+                            @Override
+                            public void onFailure(@android.support.annotation.NonNull Exception e) {
+                                // Task failed with an exception
+                                // ...
+                            }
+                        });
+
+
+            }
+        }, randomNumber * 1000);
+    }
+
 
     private void handleVoiceMessage() {
 
@@ -429,7 +687,7 @@ public class ChatScreen_User extends Activity {
                 runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
-                        insertCustomMsginChats(audioUri.toString(), "mimeType/audio", "premium");
+                        insertCustomMsginChats(audioUri.toString(), "mimeType/audio", "premium", 1, false);
                     }
                 });
 
@@ -487,7 +745,7 @@ public class ChatScreen_User extends Activity {
             Uri imageUri = data.getData();
 
             Uri saveFiledURI = saveImageTOAppDirectory(imageUri);
-            insertCustomMsginChats(saveFiledURI.toString(), "mimeType/image", "premium");
+            insertCustomMsginChats(saveFiledURI.toString(), "mimeType/image", "premium", 1, false);
 
             Bitmap bitmap = null;
             try {
@@ -563,13 +821,12 @@ public class ChatScreen_User extends Activity {
             if (inputStream != null) {
                 ExifInterface exif = new ExifInterface(inputStream);
 
-                // Get the image's orientation
-                int orientation = exif.getAttributeInt(ExifInterface.TAG_ORIENTATION, ExifInterface.ORIENTATION_UNDEFINED);
-                // Close the input stream
-                inputStream.close();
+                int orientation = ImageResizer.getImageOrientation(imageUri, ChatScreen_User.this);
+
 
                 // Rotate the image to its default orientation
-                Bitmap rotatedBitmap = rotateBitmap(bitmap, orientation);
+                Bitmap rotatedBitmap = ImageResizer.rotateBitmap(bitmap, orientation);
+
 
                 // Create a temporary file to save the rotated image
                 File rotatedImageFile = createTempImageFile();
@@ -651,220 +908,6 @@ public class ChatScreen_User extends Activity {
         return imageFile;
     }
 
-    private void insertCustomMsginChats(String msg, String messageType, String chatType) {
-
-        MediaPlayer mediaPlayer = MediaPlayer.create(ChatScreen_User.this, R.raw.msg_sent_sound);
-        mediaPlayer.start();
-
-        Date currentTime = new Date();
-        scrollrecycelrvewToBottom();
-        Chats_Modelclass chats_modelclass = null;
-        if (messageType.equals("mimeType/text")) {
-            chats_modelclass = new Chats_Modelclass(msg, messageType, "", chatType, modelClass.getProfileImage(), String.valueOf(currentTime.getTime()), 1);
-
-        }
-        if (messageType.equals("mimeType/image")) {
-            chats_modelclass = new Chats_Modelclass("[Image]", messageType, msg, chatType, modelClass.getProfileImage(), String.valueOf(currentTime.getTime()), 1);
-
-        }
-        if (messageType.equals("mimeType/audio")) {
-            chats_modelclass = new Chats_Modelclass("[Audio]", messageType, msg, chatType, modelClass.getProfileImage(), String.valueOf(currentTime.getTime()), 1);
-
-        }
-        chatsArrayList.add(chats_modelclass);
-        chatAdapter.notifyItemInserted(chatsArrayList.size() - 1);
-
-
-        int index = -1;
-        for (int i = 0; i < Fragment_Messenger.adapter.userList.size(); i++) {
-
-            if (Fragment_Messenger.adapter.userList.get(i).getUsername().equals(modelClass.getUsername())) {
-                index = i;
-                UserBotMsg userBotMsg1 = new UserBotMsg();
-                userBotMsg1.setDateTime(String.valueOf(currentTime.getTime()));
-                userBotMsg1.setRead(1);
-                userBotMsg1.setSent(1);
-                userBotMsg1.setMimeType(messageType);
-
-                userBotMsg1.setNextMsgDelay(5555);
-
-                if (messageType.equals("mimeType/text")) {
-                    userBotMsg1.setMsg(msg);
-                    userBotMsg1.setExtraMsg("");
-
-                } else {
-                    if (messageType.equals("mimeType/image")) {
-                        userBotMsg1.setMsg("[Image]");
-                    } else {
-                        userBotMsg1.setMsg("[Audio]");
-                    }
-                    userBotMsg1.setExtraMsg(msg);
-                }
-
-
-                ArrayList<UserBotMsg> temp = new ArrayList<>();
-
-                if (modelClass.isContainsQuestion()) {
-
-                    temp.addAll(modelClass.getQuestionWithAns().getReplyToUser());
-                    for (int j = 0; j < modelClass.getQuestionWithAns().getReplyToUser().size(); j++) {
-                        if (modelClass.getQuestionWithAns().getReplyToUser().get(j).getSent() == 0) {
-                            if (j == 0) {
-                                //first loop
-                                temp.add(0, userBotMsg1);
-                                break;
-                            } else {
-                                //middleloop
-                                temp.add(j, userBotMsg1);
-                                break;
-                            }
-                        }
-                        if (j == modelClass.getQuestionWithAns().getReplyToUser().size() - 1) {
-                            //last loop
-                            temp.add(userBotMsg1);
-                        }
-                    }
-
-                    modelClass.getQuestionWithAns().setReplyToUser(temp);
-                } else {
-                    temp.addAll(modelClass.getUserBotMsg());
-                    for (int j = 0; j < modelClass.getUserBotMsg().size(); j++) {
-                        if (modelClass.getUserBotMsg().get(j).getSent() == 0) {
-                            if (j == 0) {
-                                //first loop
-                                temp.add(0, userBotMsg1);
-                                break;
-                            } else {
-                                //middleloop
-                                temp.add(j, userBotMsg1);
-                                break;
-                            }
-                        }
-
-                        if (j == modelClass.getUserBotMsg().size() - 1) {
-                            //last loop
-                            temp.add(userBotMsg1);
-                        }
-
-                    }
-                    modelClass.setUserBotMsg(temp);
-                }
-
-            }
-
-        }
-
-
-//        Fragment_Messenger.adapter.userList.remove(i);
-//        Fragment_Messenger.adapter.userList.add(0, modelClass);
-        chatAdapter.notifyDataSetChanged();
-        update_userListTemp();
-
-
-        Fragment_Messenger.adapter.userList.remove(index);
-        Fragment_Messenger.adapter.userList.add(0, modelClass);
-        Fragment_Messenger.adapter.notifyItemMoved(index, 0);
-        Fragment_Messenger.adapter.notifyItemChanged(0);
-
-        Fragment_Messenger.save_sharedPrefrence(ChatScreen_User.this, Fragment_Messenger.adapter.userList);
-
-    }
-
-
-    private void sendDataRecyclerview() {
-        actionbar();// this is because when user clicks on hello image direclty , than we have to read username data from db which takes time than we call actionbar();
-
-        chatsArrayList = new ArrayList<Chats_Modelclass>();
-
-        if (modelClass.isContainsQuestion()) {
-
-            UserQuestionWithAns userQuestionWithAns = modelClass.getQuestionWithAns();
-            Chats_Modelclass chats_modelclass = new Chats_Modelclass(userQuestionWithAns.getQuestion(), "mimeType/text", "", "", modelClass.getProfileImage(), userQuestionWithAns.getDateTime(), 2);
-            chatsArrayList.add(chats_modelclass);
-
-            if (modelClass.getQuestionWithAns().getRead() == 0) {
-                modelClass.getQuestionWithAns().setRead(1);
-            }
-
-            if (userQuestionWithAns.getReply().length() == 0) {
-                //not replied yet
-                setAnwswerOptions(userQuestionWithAns);
-            } else {
-
-                //adding reply message  only
-                Chats_Modelclass chats_modelclass2 = new Chats_Modelclass(userQuestionWithAns.getReply(), "mimeType/text", "", "", modelClass.getProfileImage(), userQuestionWithAns.getDateTime(), 1);
-                chatsArrayList.add(chats_modelclass2);
-
-                //after reply message is added, add all remainig replies which is sent already
-                for (int i = 0; i < modelClass.getQuestionWithAns().getReplyToUser().size(); i++) {
-                    UserBotMsg userBotMsg = modelClass.getQuestionWithAns().getReplyToUser().get(i);
-                    if (userBotMsg.getSent() == 1) {
-                        if (userBotMsg.getNextMsgDelay() == 5555) {
-                            //this msg is custom message sent by mobile user and is identified if getNextMsgDelay == 5555
-                            Chats_Modelclass chats_modelclass3 = new Chats_Modelclass(userBotMsg.getMsg(), userBotMsg.getMimeType(), userBotMsg.getExtraMsg(), "premium", modelClass.getProfileImage(), userBotMsg.getDateTime(), 1);
-                            chatsArrayList.add(chats_modelclass3);
-
-                        } else {
-                            Chats_Modelclass chats_modelclass3 = new Chats_Modelclass(userBotMsg.getMsg(), userBotMsg.getMimeType(), userBotMsg.getExtraMsg(), "", modelClass.getProfileImage(), userBotMsg.getDateTime(), 2);
-                            chatsArrayList.add(chats_modelclass3);
-                        }
-                        modelClass.getQuestionWithAns().getReplyToUser().get(i).setRead(1);
-                        update_userListTemp();
-
-                    }
-                }
-            }
-
-
-        } else {
-            for (int i = 0; i < modelClass.getUserBotMsg().size(); i++) {
-                if (modelClass.getUserBotMsg().get(i).getSent() == 1) {
-                    UserBotMsg userBotMsg = modelClass.getUserBotMsg().get(i);
-                    if (userBotMsg.getNextMsgDelay() == 5555) {
-                        //this msg is custom message sent by mobile user and is identified if getNextMsgDelay == 0
-
-                        if (userBotMsg.getExtraMsg().equals("hi")) { //this is the direct hi message when user clicks on hello image
-                            Chats_Modelclass chats_modelclass3 = new Chats_Modelclass(userBotMsg.getMsg(), userBotMsg.getMimeType(), userBotMsg.getExtraMsg(), "", modelClass.getProfileImage(), userBotMsg.getDateTime(), 1);
-                            chatsArrayList.add(chats_modelclass3);
-                        } else {
-                            Chats_Modelclass chats_modelclass = new Chats_Modelclass(userBotMsg.getMsg(), userBotMsg.getMimeType(), userBotMsg.getExtraMsg(), "premium", modelClass.getProfileImage(), userBotMsg.getDateTime(), 1);
-                            chatsArrayList.add(chats_modelclass);
-                        }
-
-                    } else {
-                        Chats_Modelclass chats_modelclass = new Chats_Modelclass(userBotMsg.getMsg(), userBotMsg.getMimeType(), userBotMsg.getExtraMsg(), "", modelClass.getProfileImage(), userBotMsg.getDateTime(), 2);
-                        chatsArrayList.add(chats_modelclass);
-                    }
-
-                    if (modelClass.getUserBotMsg().get(i).getRead() == 0) {
-                        modelClass.getUserBotMsg().get(i).setRead(1);
-
-                        for (int j = 0; j < Fragment_Messenger.adapter.userList.size(); j++) {
-                            if (Fragment_Messenger.adapter.userList.get(j).getUsername().equals(modelClass.getUsername())) {
-                                Fragment_Messenger.adapter.userList.get(j).getUserBotMsg().get(i).setRead(1);
-                                Fragment_Messenger.save_sharedPrefrence(ChatScreen_User.this, Fragment_Messenger.adapter.userList);
-
-                            }
-                        }
-
-                    }
-                }
-            }
-        }
-
-        recylerview = findViewById(R.id.recylerview);
-
-
-        LinearLayoutManager linearLayoutManager = new LinearLayoutManager(ChatScreen_User.this);
-        linearLayoutManager.setStackFromEnd(true);
-        recylerview.setLayoutManager(linearLayoutManager);
-        chatAdapter = new ChatsAdapter(ChatScreen_User.this, chatsArrayList, recylerview, mediaPlayer, modelClass);
-        recylerview.setAdapter(chatAdapter);
-
-        scrollrecycelrvewToBottom();
-        load_UnsentMessage();
-
-    }
 
     private void setAnwswerOptions(UserQuestionWithAns userQuestionWithAns) {
         answerslayout = findViewById(R.id.answerslayout);
@@ -962,7 +1005,7 @@ public class ChatScreen_User extends Activity {
         myRunnable = new Runnable() {
             @Override
             public void run() {
-//                checkForUpdate();
+                checkForUpdate();
                 // Schedule the task to run again after 1 second
                 handler.postDelayed(this, 500);
             }
@@ -1021,7 +1064,6 @@ public class ChatScreen_User extends Activity {
 
             }
         }
-        update_userListTemp();
 
     }
 
@@ -1034,7 +1076,11 @@ public class ChatScreen_User extends Activity {
         TextView viewProfile = findViewById(R.id.viewProfile);
         TextView profileName = findViewById(R.id.profileName);
 
-
+        ImageView onlineDot = findViewById(R.id.onlineDot);
+        isOnline = getIntent().getBooleanExtra("online", false);
+        if (isOnline) {
+            onlineDot.setVisibility(View.VISIBLE);
+        }
         profileName.setText(modelClass.getName());
         profileName.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -1336,6 +1382,15 @@ public class ChatScreen_User extends Activity {
         }
     }
 
+    private void showAds() {
+        if (SplashScreen.Ad_Network_Name.equals("admob")) {
+            ADS_ADMOB.Interstitial_Ad(this);
+        } else {
+            com.facebook.ads.InterstitialAd facebook_IntertitialAds = null;
+            ADS_FACEBOOK.interstitialAd(this, facebook_IntertitialAds, getString(R.string.Facebook_InterstitialAdUnit));
+        }
+    }
+
 
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
@@ -1347,505 +1402,6 @@ public class ChatScreen_User extends Activity {
                 // Permission is denied. You may want to show a message or disable recording functionality.
             }
         }
-    }
-}
-
-class ChatsAdapter extends RecyclerView.Adapter {
-
-    Context context;
-    ArrayList<Chats_Modelclass> chatsArrayList;
-    int SENDER = 1; // mobile user
-    int RECEIVER = 2; // from outside
-    RecyclerView recyclerview;
-    MediaPlayer mediaPlayer;
-    ChatItem_ModelClass modelClass;
-
-    public ChatsAdapter(Context context, ArrayList<Chats_Modelclass> chatsArrayList, RecyclerView recyclerview, MediaPlayer mediaPlayer, ChatItem_ModelClass modelClass) {
-        this.context = context;
-        this.chatsArrayList = chatsArrayList;
-        this.recyclerview = recyclerview;
-        this.mediaPlayer = mediaPlayer;
-        this.modelClass = modelClass;
-
-    }
-
-
-    @NonNull
-    @Override
-    public RecyclerView.ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        if (viewType == SENDER) {
-            View view = LayoutInflater.from(context).inflate(R.layout.sender_layout, parent, false);
-            return new SenderVierwHolder(view);
-        } else {
-            View view = LayoutInflater.from(context).inflate(R.layout.userchat_reciver_layout, parent, false);
-            return new ReciverViewHolder(view);
-        }
-
-    }
-
-    @Override
-    public void onBindViewHolder(@NonNull RecyclerView.ViewHolder holder, int position) {
-        Chats_Modelclass chats = chatsArrayList.get(position);
-
-
-        long timestamp = Long.parseLong(chats.getTimeStamp()); // Example timestamp value
-
-        Date date = new Date(timestamp);
-        SimpleDateFormat sdf = new SimpleDateFormat("HH:mm MM-dd");
-        String formattedDate = sdf.format(date);
-
-
-        if (chats.getViewType() == 2) {
-            ChatsAdapter.ReciverViewHolder reciverViewHolder = (ReciverViewHolder) holder;
-            reciverViewHolder.timeStamp.setText(formattedDate);
-            Picasso.get().load(chats.getProfileUrl()).into(reciverViewHolder.profileImage);
-
-            if (chats.getMessageType().equals("mimeType/text")) {
-                reciverViewHolder.textMsg.setText(chats.getMessage());
-                reciverViewHolder.picMsgLayout.setVisibility(View.GONE);
-                reciverViewHolder.audioMsg.setVisibility(View.GONE);
-                translateMessage(chats.getMessage(), reciverViewHolder.translatedMessage);
-            }
-            if (chats.getMessageType().equals("mimeType/audio")) {
-                reciverViewHolder.picMsgLayout.setVisibility(View.GONE);
-                reciverViewHolder.audioMsg.setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View view) {
-
-                        if (mediaPlayer != null && mediaPlayer.isPlaying()) {
-                            return;
-                        }
-                        try {
-                            reciverViewHolder.audioProgressBar.setVisibility(View.VISIBLE);
-                            mediaPlayer = new MediaPlayer();
-                            mediaPlayer.setAudioAttributes(new AudioAttributes.Builder().setContentType(AudioAttributes.CONTENT_TYPE_MUSIC).setUsage(AudioAttributes.USAGE_MEDIA).build());
-                            mediaPlayer.setDataSource(chats.getExtraMsg());
-                            mediaPlayer.prepareAsync();
-                            mediaPlayer.setOnPreparedListener(new MediaPlayer.OnPreparedListener() {
-                                @Override
-                                public void onPrepared(MediaPlayer mp) {
-                                    reciverViewHolder.audioProgressBar.setVisibility(View.GONE);
-                                    reciverViewHolder.playAudiolottie.playAnimation();
-                                    mediaPlayer.start();
-                                }
-                            });
-                            mediaPlayer.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
-                                @Override
-                                public void onCompletion(MediaPlayer mediaPlayer) {
-                                    reciverViewHolder.playAudiolottie.cancelAnimation();
-                                    mediaPlayer.stop();
-
-                                }
-                            }); // Set the OnCompletionListener
-
-
-                        } catch (IOException e) {
-                            e.printStackTrace();
-                        }
-                    }
-                });
-                reciverViewHolder.textMsg.setVisibility(View.GONE);
-
-            }
-
-            if (chats.getMessageType().equals("mimeType/image")) {
-                Picasso.get().load(chats.getExtraMsg()).into(reciverViewHolder.picMsg);
-                reciverViewHolder.textMsg.setVisibility(View.GONE);
-                reciverViewHolder.audioMsg.setVisibility(View.GONE);
-
-                reciverViewHolder.picMsgLayout.setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View view) {
-                        ArrayList<Map<String, String>> imageList = new ArrayList<>();
-
-                        for (int i = 0; i < modelClass.getUserBotMsg().size(); i++) {
-                            if (modelClass.getUserBotMsg().get(i).getMimeType().equals("mimeType/image") && modelClass.getUserBotMsg().get(i).getSent() == 1) {
-                                Map<String, String> stringMap2 = new HashMap<>();
-                                stringMap2.put("url", modelClass.getUserBotMsg().get(i).getExtraMsg());
-                                stringMap2.put("type", "free");
-                                imageList.add(stringMap2);
-                            }
-                        }
-                        if (modelClass.isContainsQuestion()) {
-                            for (int i = 0; i < modelClass.getQuestionWithAns().getReplyToUser().size(); i++) {
-                                if (modelClass.getQuestionWithAns().getReplyToUser().get(i).getMimeType().equals("mimeType/image") && modelClass.getQuestionWithAns().getReplyToUser().get(i).getSent() == 1) {
-                                    Map<String, String> stringMap2 = new HashMap<>();
-                                    stringMap2.put("url", modelClass.getQuestionWithAns().getReplyToUser().get(i).getExtraMsg());
-                                    stringMap2.put("type", "free");
-                                    imageList.add(stringMap2);
-                                }
-                            }
-                        }
-
-                        int index = 0;
-                        for (int i = 0; i < imageList.size(); i++) {
-                            if (imageList.get(i).get("url").equals(chats.getExtraMsg())) {
-                                index = i;
-                            }
-                        }
-
-
-                        DisplayMetrics displayMetrics = new DisplayMetrics();
-                        ((Activity) context).getWindowManager().getDefaultDisplay().getMetrics(displayMetrics);
-                        int originalScreenWidth = displayMetrics.widthPixels;
-                        int screenHeight = displayMetrics.heightPixels;
-
-
-                        Log.d("SDfsd", "onClick: " + imageList.size());
-                        // Decrease the screen width by 15%
-                        int screenWidth = (int) (originalScreenWidth * 0.85);
-                        Fragment_LargePhotoViewer fragment = Fragment_LargePhotoViewer.newInstance(context, (ArrayList<Map<String, String>>) imageList, index, screenWidth, screenHeight);
-
-                        FragmentManager fragmentManager = ((Activity) context).getFragmentManager();
-                        fragmentManager.beginTransaction().replace(R.id.fragment_container, fragment) // Replace with your container ID
-                                .addToBackStack(null) // Optional, for back navigation
-                                .commit();
-
-                    }
-                });
-
-
-            }
-
-        }
-
-        if (chats.getViewType() == 1) {
-            ChatsAdapter.SenderVierwHolder senderVierwHolder = (ChatsAdapter.SenderVierwHolder) holder;
-
-            if (chats.getMessageType().equals("mimeType/text")) {
-                senderVierwHolder.textMsg.setText(chats.getMessage());
-                senderVierwHolder.picMsgLayout.setVisibility(View.GONE);
-                senderVierwHolder.audioMsg.setVisibility(View.GONE);
-            }
-            if (chats.getMessageType().equals("mimeType/audio")) {
-                senderVierwHolder.picMsgLayout.setVisibility(View.GONE);
-                senderVierwHolder.audioMsg.setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View view) {
-
-                        if (mediaPlayer != null && mediaPlayer.isPlaying()) {
-                            return;
-                        }
-
-                        try {
-                            senderVierwHolder.audioProgressBar.setVisibility(View.VISIBLE);
-                            mediaPlayer = new MediaPlayer();
-                            mediaPlayer.setAudioAttributes(new AudioAttributes.Builder().setContentType(AudioAttributes.CONTENT_TYPE_MUSIC).setUsage(AudioAttributes.USAGE_MEDIA).build());
-
-                            String audioSource = chats.getExtraMsg(); // Get the audio source (URL or URI as a string)
-
-                            // Check if the audio source is a URL or a local file URI
-                            if (audioSource.startsWith("http")) {
-                                // It's an audio URL
-                                mediaPlayer.setDataSource(audioSource);
-                            } else {
-                                // It's a local file URI as a string, so convert it back to a Uri
-                                Uri audioUri = Uri.parse(audioSource);
-                                mediaPlayer.setDataSource(context, audioUri);
-                            }
-
-                            mediaPlayer.prepareAsync();
-                            mediaPlayer.setOnPreparedListener(new MediaPlayer.OnPreparedListener() {
-                                @Override
-                                public void onPrepared(MediaPlayer mp) {
-                                    senderVierwHolder.audioProgressBar.setVisibility(View.GONE);
-                                    senderVierwHolder.playAudiolottie.playAnimation();
-                                    mediaPlayer.start();
-                                }
-                            });
-                            mediaPlayer.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
-                                @Override
-                                public void onCompletion(MediaPlayer mediaPlayer) {
-                                    senderVierwHolder.playAudiolottie.cancelAnimation();
-                                    mediaPlayer.stop();
-                                }
-                            }); // Set the OnCompletionListener
-                        } catch (IOException e) {
-                            e.printStackTrace();
-                        }
-                    }
-                });
-                senderVierwHolder.textMsg.setVisibility(View.GONE);
-                senderVierwHolder.audioMsgLayout.setVisibility(View.VISIBLE);
-            }
-            if (chats.getMessageType().equals("mimeType/image")) {
-
-                senderVierwHolder.picMsgLayout.setVisibility(View.VISIBLE);
-
-                Log.d("asdf", "onBindViewHolder: " + chats.getExtraMsg());
-                if (chats.getExtraMsg().startsWith("http")) {
-                    Picasso.get().load(chats.getExtraMsg()).into(senderVierwHolder.picMsg);
-
-                } else {
-                    try {
-                        Bitmap bitmap = checkOrientation(Uri.parse(chats.getExtraMsg())); //change orientation to default
-                        senderVierwHolder.picMsg.setImageBitmap(bitmap);
-
-                    } catch (Exception e) {
-                    }
-                }
-
-                senderVierwHolder.textMsg.setVisibility(View.GONE);
-                senderVierwHolder.audioMsg.setVisibility(View.GONE);
-
-                senderVierwHolder.picMsgLayout.setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View view) {
-                        ArrayList<Map<String, String>> imageList = new ArrayList<>();
-                        for (int i = 0; i < modelClass.getUserBotMsg().size(); i++) {
-                            if (modelClass.getUserBotMsg().get(i).getMimeType().equals("mimeType/image") && modelClass.getUserBotMsg().get(i).getSent() == 1) {
-                                Map<String, String> stringMap2 = new HashMap<>();
-                                stringMap2.put("url", modelClass.getUserBotMsg().get(i).getExtraMsg());
-                                stringMap2.put("type", "free");
-                                imageList.add(stringMap2);
-                            }
-                        }
-                        if (modelClass.isContainsQuestion()) {
-                            for (int i = 0; i < modelClass.getQuestionWithAns().getReplyToUser().size(); i++) {
-                                if (modelClass.getQuestionWithAns().getReplyToUser().get(i).getMimeType().equals("mimeType/image") && modelClass.getQuestionWithAns().getReplyToUser().get(i).getSent() == 1) {
-                                    Map<String, String> stringMap2 = new HashMap<>();
-                                    stringMap2.put("url", modelClass.getQuestionWithAns().getReplyToUser().get(i).getExtraMsg());
-                                    stringMap2.put("type", "free");
-                                    imageList.add(stringMap2);
-                                }
-                            }
-                        }
-
-                        int index = 0;
-                        for (int i = 0; i < imageList.size(); i++) {
-                            if (imageList.get(i).get("url").equals(chats.getExtraMsg())) {
-                                index = i;
-                            }
-                        }
-
-
-                        DisplayMetrics displayMetrics = new DisplayMetrics();
-                        ((Activity) context).getWindowManager().getDefaultDisplay().getMetrics(displayMetrics);
-                        int originalScreenWidth = displayMetrics.widthPixels;
-                        int screenHeight = displayMetrics.heightPixels;
-
-
-                        Log.d("SDfsd", "onClick: " + imageList.size());
-                        // Decrease the screen width by 15%
-                        int screenWidth = (int) (originalScreenWidth * 0.85);
-                        Fragment_LargePhotoViewer fragment = Fragment_LargePhotoViewer.newInstance(context, (ArrayList<Map<String, String>>) imageList, index, screenWidth, screenHeight);
-
-                        FragmentManager fragmentManager = ((Activity) context).getFragmentManager();
-                        fragmentManager.beginTransaction().replace(R.id.fragment_container, fragment) // Replace with your container ID
-                                .addToBackStack(null) // Optional, for back navigation
-                                .commit();
-
-                    }
-                });
-
-
-            }
-
-            senderVierwHolder.timeStamp.setText(formattedDate);
-
-
-            if (SplashScreen.userLoggedIAs.equals("Google")) {
-                SharedPreferences sh = context.getSharedPreferences("UserInfo", MODE_PRIVATE);
-                String urll = sh.getString("photoUrl", "not set");
-                Picasso.get().load(urll).into(senderVierwHolder.profile);
-            }
-
-            updateErrorIcon(senderVierwHolder.errorLayout, senderVierwHolder.errorIcon, chats.getChatType());
-        }
-
-    }
-
-    private void translateMessage(String message, TextView translatedMessage) {
-        LanguageTranslateAPI.postData(context, message, "hi",translatedMessage);
-
-    }
-
-    private Bitmap checkOrientation(Uri imageUri) {
-
-        InputStream inputStream = null;
-        try {
-            inputStream = context.getContentResolver().openInputStream(imageUri);
-            ExifInterface exif = new ExifInterface(inputStream);
-            int orientation = exif.getAttributeInt(ExifInterface.TAG_ORIENTATION, ExifInterface.ORIENTATION_UNDEFINED);
-            Bitmap originalBitmap = MediaStore.Images.Media.getBitmap(context.getContentResolver(), imageUri);
-            Bitmap rotatedBitmap = ChatScreen_User.rotateBitmap(originalBitmap, orientation);
-
-            return rotatedBitmap;
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
-    }
-
-    private void updateErrorIcon(FrameLayout errorLayout, ImageView errorIcon, String chatType) {
-        if (!chatType.equals("premium") || SplashScreen.coins > 0) {
-            errorLayout.setVisibility(View.GONE);
-        }
-        new Handler().postDelayed(new Runnable() {
-            @Override
-            public void run() {
-                errorIcon.setVisibility(View.VISIBLE);
-                errorIcon.setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View view) {
-                        ChatScreen_User.rechargeDialog(view.getContext());
-                    }
-                });
-            }
-        }, 3000);
-    }
-
-    @Override
-    public int getItemCount() {
-        return chatsArrayList.size();
-    }
-
-    @Override
-    public int getItemViewType(int position) {
-        Chats_Modelclass messages = chatsArrayList.get(position);
-        if (messages.getViewType() == 1) {
-            return SENDER;
-        } else {
-            return RECEIVER;
-        }
-    }
-
-    static class SenderVierwHolder extends RecyclerView.ViewHolder {
-        CircleImageView profile;
-        TextView textMsg;
-        TextView timeStamp;
-        ImageView picMsg;
-        CardView audioMsg;
-        FrameLayout picMsgLayout;
-        LottieAnimationView playAudiolottie;
-        ProgressBar audioProgressBar;
-        FrameLayout errorLayout;
-        ImageView errorIcon;
-        LinearLayout audioMsgLayout;
-
-        public SenderVierwHolder(@NonNull View itemView) {
-            super(itemView);
-
-            profile = itemView.findViewById(R.id.profileImage);
-            textMsg = itemView.findViewById(R.id.message);
-            timeStamp = itemView.findViewById(R.id.timeStamp);
-
-            picMsg = itemView.findViewById(R.id.picMsg);
-            audioMsg = itemView.findViewById(R.id.audioMsg);
-            picMsgLayout = itemView.findViewById(R.id.picMsgLayout);
-            playAudiolottie = itemView.findViewById(R.id.playAudiolottie);
-            audioProgressBar = itemView.findViewById(R.id.audioProgressBar);
-            errorLayout = itemView.findViewById(R.id.errorLayout);
-            errorIcon = itemView.findViewById(R.id.errorIcon);
-            audioMsgLayout = itemView.findViewById(R.id.audioMsgLayout);
-
-        }
-    }
-
-    static class ReciverViewHolder extends RecyclerView.ViewHolder {
-        TextView textMsg, translatedMessage, timeStamp;
-        ImageView picMsg, profileImage;
-        CardView audioMsg;
-        FrameLayout picMsgLayout;
-        LottieAnimationView playAudiolottie;
-        ProgressBar audioProgressBar;
-
-
-        public ReciverViewHolder(@NonNull View itemView) {
-            super(itemView);
-            textMsg = itemView.findViewById(R.id.textMsg);
-            picMsg = itemView.findViewById(R.id.picMsg);
-            audioMsg = itemView.findViewById(R.id.audioMsg);
-            timeStamp = itemView.findViewById(R.id.timeStamp);
-            profileImage = itemView.findViewById(R.id.profileImage);
-            picMsgLayout = itemView.findViewById(R.id.picMsgLayout);
-            playAudiolottie = itemView.findViewById(R.id.playAudiolottie);
-            audioProgressBar = itemView.findViewById(R.id.audioProgressBar);
-            translatedMessage = itemView.findViewById(R.id.translatedMessage);
-
-        }
-    }
-
-
-}
-
-
-class Chats_Modelclass {
-
-    String message;
-    String messageType;
-    String extraMsg;
-    String chatType;
-    String profileUrl;
-    String timeStamp;
-    int viewType;//viewType 1 is sender 2 is receiver
-
-    public Chats_Modelclass() {
-    }
-
-    public Chats_Modelclass(String message, String messageType, String extraMsg, String chatType, String profileUrl, String timeStamp, int viewType) {
-        this.message = message;
-        this.messageType = messageType;
-        this.extraMsg = extraMsg;
-        this.chatType = chatType;
-        this.profileUrl = profileUrl;
-        this.timeStamp = timeStamp;
-        this.viewType = viewType;
-    }
-
-    public String getMessage() {
-        return message;
-    }
-
-    public void setMessage(String message) {
-        this.message = message;
-    }
-
-    public String getMessageType() {
-        return messageType;
-    }
-
-    public void setMessageType(String messageType) {
-        this.messageType = messageType;
-    }
-
-    public String getExtraMsg() {
-        return extraMsg;
-    }
-
-    public void setExtraMsg(String extraMsg) {
-        this.extraMsg = extraMsg;
-    }
-
-    public String getChatType() {
-        return chatType;
-    }
-
-    public void setChatType(String chatType) {
-        this.chatType = chatType;
-    }
-
-    public String getProfileUrl() {
-        return profileUrl;
-    }
-
-    public void setProfileUrl(String profileUrl) {
-        this.profileUrl = profileUrl;
-    }
-
-    public String getTimeStamp() {
-        return timeStamp;
-    }
-
-    public void setTimeStamp(String timeStamp) {
-        this.timeStamp = timeStamp;
-    }
-
-    public int getViewType() {
-        return viewType;
-    }
-
-    public void setViewType(int viewType) {
-        this.viewType = viewType;
     }
 }
 

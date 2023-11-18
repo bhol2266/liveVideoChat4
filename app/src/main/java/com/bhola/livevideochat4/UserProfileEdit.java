@@ -39,6 +39,7 @@ import androidx.cardview.widget.CardView;
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.bhola.livevideochat4.Models.GalleryModel;
 import com.google.android.material.imageview.ShapeableImageView;
 import com.google.common.reflect.TypeToken;
 import com.google.firebase.firestore.CollectionReference;

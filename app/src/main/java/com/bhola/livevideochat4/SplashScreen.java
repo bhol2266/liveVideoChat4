@@ -28,6 +28,7 @@ import androidx.core.view.WindowInsetsCompat;
 import androidx.core.view.WindowInsetsControllerCompat;
 
 import com.airbnb.lottie.LottieAnimationView;
+import com.bhola.livevideochat4.Models.CountryInfo_Model;
 import com.bhola.livevideochat4.Models.Model_Profile;
 import com.google.android.material.snackbar.Snackbar;
 import com.google.common.reflect.TypeToken;
@@ -145,7 +146,7 @@ public class SplashScreen extends AppCompatActivity {
                 animationCompleted = true;
 
                 if (!activityChanged) {
-                    handler_forIntent();
+//                    handler_forIntent();
                 }
 
 
@@ -173,9 +174,8 @@ public class SplashScreen extends AppCompatActivity {
     }
 
 
-
     private void clearChats() {
-        SharedPreferences sharedPreferences = SplashScreen.this.getSharedPreferences("UserInfo", MODE_PRIVATE);
+        SharedPreferences sharedPreferences = SplashScreen.this.getSharedPreferences("messenger_chats", MODE_PRIVATE);
         SharedPreferences.Editor editor = sharedPreferences.edit();
 
 // Clear the SharedPreferences
@@ -266,6 +266,8 @@ public class SplashScreen extends AppCompatActivity {
                 userLoggedIAs = "Guest";
 
             }
+        } else {
+            handler_forIntent();
         }
         Login_Times = a + 1;
 
@@ -285,8 +287,7 @@ public class SplashScreen extends AppCompatActivity {
 
         DocumentReference userRef = usersRef.document(String.valueOf(userId));
 
-        userRef.get()
-                .addOnSuccessListener(documentSnapshot -> {
+        userRef.get().addOnSuccessListener(documentSnapshot -> {
                     if (documentSnapshot.exists()) {
                         userModel = documentSnapshot.toObject(UserModel.class);
                         // Use the user data
@@ -298,7 +299,7 @@ public class SplashScreen extends AppCompatActivity {
                         }
                     } else {
 
-                        SplashScreen.userLoggedIn=false;
+                        SplashScreen.userLoggedIn = false;
                         if (animationCompleted) {
                             handler_forIntent();
                         }

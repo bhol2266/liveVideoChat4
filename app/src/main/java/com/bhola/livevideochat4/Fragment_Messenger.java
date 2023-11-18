@@ -25,6 +25,9 @@ import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.bhola.livevideochat4.Models.ChatItem_ModelClass;
+import com.bhola.livevideochat4.Models.UserBotMsg;
+import com.bhola.livevideochat4.Models.UserQuestionWithAns;
 import com.google.common.reflect.TypeToken;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
@@ -60,7 +63,7 @@ public class Fragment_Messenger extends Fragment {
 
     private Dialog alertNotificationDialog;
     private static final long AUTO_DISMISS_DELAY = 4000; // 4 seconds
-   public static int count=0;
+    public static int count = 0;
 
     public Fragment_Messenger() {
         // Required empty public constructor
@@ -77,7 +80,6 @@ public class Fragment_Messenger extends Fragment {
 
         context = getContext();
         // Inflate the layout for this fragment
-
 
 
         setRecyclerView();
@@ -290,7 +292,8 @@ public class Fragment_Messenger extends Fragment {
 
         userListTemp = new ArrayList<>();
         layoutManager = new LinearLayoutManager(context);
-        recyclerview.setLayoutManager(layoutManager);
+        recyclerview.setLayoutManager(new WrapContentLinearLayoutManager(context, LinearLayoutManager.HORIZONTAL, false));
+
         adapter = new MessengeItemsAdapter(userListTemp, context, adapter, recyclerview);
 
         recyclerview.setAdapter(adapter);
@@ -434,7 +437,7 @@ public class Fragment_Messenger extends Fragment {
         if (userListTemp == null) {
             return;
         }
-         count = 0;
+        count = 0;
 
         for (int i = 0; i < Fragment_Messenger.userListTemp.size(); i++) {
 
@@ -469,6 +472,8 @@ public class Fragment_Messenger extends Fragment {
     public void onResume() {
         super.onResume();
         updateUnreadmessageCount(context);
+
+
     }
 
 }
@@ -536,6 +541,7 @@ class MessengeItemsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
                 editor.apply(); // Apply the changes to SharedPreferences
 
                 Intent intent = new Intent(context, ChatScreen_User.class);
+                intent.putExtra("online", true);
                 context.startActivity(intent);
             }
         });
@@ -569,7 +575,7 @@ class MessengeItemsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
 
                             int time = 0;
                             if (holder.getAbsoluteAdapterPosition() == -1) {
-                                time = 10000;
+                                time = 200000;
                             }
                             new Handler().postDelayed(new Runnable() {
                                 @Override
@@ -662,7 +668,7 @@ class MessengeItemsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
                         public void run() {
                             int time = 0;
                             if (holder.getAbsoluteAdapterPosition() == -1) {
-                                time = 100000;
+                                time = 300000;
                             }
                             new Handler().postDelayed(new Runnable() {
                                 @Override
@@ -851,3 +857,18 @@ class ForegroundCheckTask extends AsyncTask<Context, Void, Boolean> {
     }
 }
 
+class WrapContentLinearLayoutManager extends LinearLayoutManager {
+    public WrapContentLinearLayoutManager(Context context, int horizontal, boolean b) {
+        super(context);
+    }
+
+    //... constructor
+    @Override
+    public void onLayoutChildren(RecyclerView.Recycler recycler, RecyclerView.State state) {
+        try {
+            super.onLayoutChildren(recycler, state);
+        } catch (IndexOutOfBoundsException e) {
+            Log.e("TAG", "meet a IOOBE in RecyclerView");
+        }
+    }
+}
