@@ -5,11 +5,9 @@ import static android.content.Context.MODE_PRIVATE;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.net.ParseException;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -29,10 +27,6 @@ import com.google.android.gms.auth.api.signin.GoogleSignInClient;
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions;
 import com.google.firebase.auth.FirebaseAuth;
 import com.squareup.picasso.Picasso;
-
-import java.text.SimpleDateFormat;
-import java.util.Calendar;
-import java.util.Date;
 
 public class Fragment_UserProfile extends Fragment {
 
@@ -131,9 +125,14 @@ public class Fragment_UserProfile extends Fragment {
         String Gender = sh.getString("Gender", "");
         String Birthday = sh.getString("Birthday", "");
 
-        int age = calculateAge(Birthday);
-        TextView ageText = view.findViewById(R.id.ageText);
-        ageText.setText(String.valueOf(age));
+        try {
+            int age = new Utils().calculateAge(Birthday);
+            TextView ageText = view.findViewById(R.id.ageText);
+            ageText.setText(String.valueOf(age));
+        } catch (Exception e) {
+            Toast.makeText(context, e.getMessage(), Toast.LENGTH_SHORT).show();
+        }
+
 
         if (Gender.equals("male")) {
             ImageView genderIcon = view.findViewById(R.id.genderIcon);
@@ -174,38 +173,6 @@ public class Fragment_UserProfile extends Fragment {
 
     }
 
-    private int calculateAge(String birthDateString) {
-        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
-        try {
-            // Parse the birthdate string into a Date object
-            Date birthDate = sdf.parse(birthDateString);
-
-            // Get the current date
-            Calendar currentDate = Calendar.getInstance();
-            Date now = currentDate.getTime();
-
-            // Calculate the age
-
-            Calendar cal1 = Calendar.getInstance();
-            cal1.setTime(birthDate);
-            Calendar cal2 = Calendar.getInstance();
-            cal2.setTime(currentDate.getTime());
-
-            int age = cal2.get(Calendar.YEAR) - cal1.get(Calendar.YEAR);
-
-            // Check if the birthdate has occurred this year or not
-            if (cal2.get(Calendar.DAY_OF_YEAR) < cal1.get(Calendar.DAY_OF_YEAR)) {
-                age--;
-            }
-            return age;
-
-        } catch (ParseException e) {
-            e.printStackTrace();
-        } catch (java.text.ParseException e) {
-            throw new RuntimeException(e);
-        }
-        return 0;
-    }
 
     private void notificationBar() {
         Fragment_Messenger.updateUnreadmessageCount(context);

@@ -230,7 +230,7 @@ public class LoginScreen extends AppCompatActivity {
 
                             dismissLoadingDialog();
                             if (SplashScreen.userModel.getGalleryImages().size() > 1) {
-                                saveGalleryImages(SplashScreen.userModel.getGalleryImages()); // save fallery images to local storeage from firebase storage
+                                saveGalleryImages(SplashScreen.userModel.getGalleryImages()); // save gallery images to local storeage from firebase storage
                             } else {
                                 startActivity(new Intent(LoginScreen.this, MainActivity.class));
                             }

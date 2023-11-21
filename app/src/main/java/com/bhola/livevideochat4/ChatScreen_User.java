@@ -171,7 +171,7 @@ public class ChatScreen_User extends Activity {
             } else {
 
                 //adding reply message  only
-                Chats_Modelclass chats_modelclass2 = new Chats_Modelclass(userQuestionWithAns.getReply(), "mimeType/text", "", "free", modelClass.getProfileImage(), userQuestionWithAns.getDateTime(),1 );
+                Chats_Modelclass chats_modelclass2 = new Chats_Modelclass(userQuestionWithAns.getReply(), "mimeType/text", "", "free", modelClass.getProfileImage(), userQuestionWithAns.getDateTime(), 1);
                 chatsArrayList.add(chats_modelclass2);
 
                 //after reply message is added, add all remainig replies which is sent already
@@ -252,7 +252,7 @@ public class ChatScreen_User extends Activity {
         ArrayList<UserBotMsg> userBotMsgList = new ArrayList<>();
         Date currentTime = new Date();
 
-        UserBotMsg userBotMsg = new UserBotMsg("hi", "mimeType/text", "hi", String.valueOf(currentTime.getTime()), 0, 1, 1,"free",1);
+        UserBotMsg userBotMsg = new UserBotMsg("hi", "mimeType/text", "hi", String.valueOf(currentTime.getTime()), 0, 1, 1, "free", 1);
         userBotMsgList.add(userBotMsg);
         if (isOnline) {
             smartReply("hi");
@@ -538,48 +538,53 @@ public class ChatScreen_User extends Activity {
 
     private void smartReply(String msg) {
 
-        Random random = new Random();
-        int randomNumber = random.nextInt(10 - 5) + 5;
-        conversation.clear();
-        conversation.add(FirebaseTextMessage.createForRemoteUser(
-                msg, System.currentTimeMillis(), "sadfsadf"));
-        new Handler().postDelayed(new Runnable() {
-            @Override
-            public void run() {
-                FirebaseSmartReply smartReply = FirebaseNaturalLanguage.getInstance().getSmartReply();
-                smartReply.suggestReplies(conversation)
-                        .addOnSuccessListener(new OnSuccessListener<SmartReplySuggestionResult>() {
-                            @Override
-                            public void onSuccess(SmartReplySuggestionResult result) {
-                                if (result.getStatus() == SmartReplySuggestionResult.STATUS_NOT_SUPPORTED_LANGUAGE) {
-                                    // The conversation's language isn't supported, so the
-                                    // the result doesn't contain any suggestions.
-                                    Log.d("wdsfafdsa", "STATUS_NOT_SUPPORTED_LANGUAGE: ");
+        try {
+            Random random = new Random();
+            int randomNumber = random.nextInt(10 - 5) + 5;
+            conversation.clear();
+            conversation.add(FirebaseTextMessage.createForRemoteUser(
+                    msg, System.currentTimeMillis(), "sadfsadf"));
+            new Handler().postDelayed(new Runnable() {
+                @Override
+                public void run() {
+                    FirebaseSmartReply smartReply = FirebaseNaturalLanguage.getInstance().getSmartReply();
+                    smartReply.suggestReplies(conversation)
+                            .addOnSuccessListener(new OnSuccessListener<SmartReplySuggestionResult>() {
+                                @Override
+                                public void onSuccess(SmartReplySuggestionResult result) {
+                                    if (result.getStatus() == SmartReplySuggestionResult.STATUS_NOT_SUPPORTED_LANGUAGE) {
+                                        // The conversation's language isn't supported, so the
+                                        // the result doesn't contain any suggestions.
+                                        Log.d("wdsfafdsa", "STATUS_NOT_SUPPORTED_LANGUAGE: ");
 
-                                } else if (result.getStatus() == SmartReplySuggestionResult.STATUS_SUCCESS) {
-                                    Random random = new Random();
-                                    int randomNumber = random.nextInt(3);
-                                    try {
+                                    } else if (result.getStatus() == SmartReplySuggestionResult.STATUS_SUCCESS) {
+                                        Random random = new Random();
+                                        int randomNumber = random.nextInt(3);
+                                        try {
 
-                                        insertCustomMsginChats(result.getSuggestions().get(randomNumber).getText().toString(), "mimeType/text", "free", 2, true);
-                                    } catch (Exception e) {
-                                        Log.d("wdsfafdsa", "Exception: " + e.getMessage());
+                                            insertCustomMsginChats(result.getSuggestions().get(randomNumber).getText().toString(), "mimeType/text", "free", 2, true);
+                                        } catch (Exception e) {
+                                            Log.d("wdsfafdsa", "Exception: " + e.getMessage());
+                                        }
+
                                     }
-
                                 }
-                            }
-                        })
-                        .addOnFailureListener(new OnFailureListener() {
-                            @Override
-                            public void onFailure(@android.support.annotation.NonNull Exception e) {
-                                // Task failed with an exception
-                                // ...
-                            }
-                        });
+                            })
+                            .addOnFailureListener(new OnFailureListener() {
+                                @Override
+                                public void onFailure(@android.support.annotation.NonNull Exception e) {
+                                    // Task failed with an exception
+                                    // ...
+                                }
+                            });
 
 
-            }
-        }, randomNumber * 1000);
+                }
+            }, randomNumber * 1000);
+
+        } catch (Exception e) {
+        }
+
     }
 
 
