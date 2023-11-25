@@ -104,7 +104,7 @@ public class Fragment_HomePage extends Fragment {
         });
 
 
-        if (SplashScreen.App_updating.equals("inactive")) {
+        if (MyApplication.App_updating.equals("inactive")) {
             loadDatabase(); //this will load images for moving images and call method    setimagesScrolling()
         }
         setButtonAnimation(view, context);
@@ -475,7 +475,7 @@ public class Fragment_HomePage extends Fragment {
                     int count = Math.min(shuffledList.size(), 100);
                     for (int i = 0; i < count; i++) {
                         String item = shuffledList.get(i);
-                        imageList_MomingIMages.add(SplashScreen.databaseURL_images + "VideoChatProfiles/" + SplashScreen.decryption(item) + "/profile.jpg");
+                        imageList_MomingIMages.add(MyApplication.databaseURL_images + "VideoChatProfiles/" + Utils.decryption(item) + "/profile.jpg");
                     }
 
                 } catch (JSONException | IOException e) {
@@ -507,7 +507,7 @@ public class Fragment_HomePage extends Fragment {
             fileWriter.close();
 
         } catch (Exception e) {
-            Log.d(SplashScreen.TAG, "run: " + e.getMessage());
+            Log.d(MyApplication.TAG, "run: " + e.getMessage());
         }
 
 

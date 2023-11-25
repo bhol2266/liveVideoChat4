@@ -130,8 +130,8 @@ public class Fragment_Calling extends Fragment {
         });
 
         VideoView videoView = view.findViewById(R.id.videoView);
-        String videoPath = SplashScreen.databaseURL_video + "InternationalChatVideos/" + username + ".mp4";
-        Log.d(SplashScreen.TAG, "init: "+videoPath);
+        String videoPath = MyApplication.databaseURL_video + "InternationalChatVideos/" + username + ".mp4";
+        Log.d(MyApplication.TAG, "init: "+videoPath);
         Uri videoUri = Uri.parse(videoPath);
         videoView.setVideoURI(videoUri);
         videoView.setBackgroundColor(getResources().getColor(R.color.color_333333));

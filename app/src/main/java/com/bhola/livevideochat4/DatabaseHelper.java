@@ -56,7 +56,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
             checkandUpdateLoginTimes_UpdateDatabaseCheck();
         } catch (Exception e) {
             this.getReadableDatabase();
-            Log.d(SplashScreen.TAG, "CheckDatabases: " + "First Time Copying " + DbName);
+            Log.d(MyApplication.TAG, "CheckDatabases: " + "First Time Copying " + DbName);
             CopyDatabases();
         }
     }
@@ -88,12 +88,12 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 
         //       Check for Database Update
 
-        Cursor cursor1 = new DatabaseHelper(context, SplashScreen.DB_NAME, SplashScreen.DB_VERSION, "DB_VERSION").read_DB_VERSION();
+        Cursor cursor1 = new DatabaseHelper(context, MyApplication.DB_NAME, MyApplication.DB_VERSION, "DB_VERSION").read_DB_VERSION();
         while (cursor1.moveToNext()) {
             int DB_VERSION_FROM_DATABASE = cursor1.getInt(1);
 
-            if (DB_VERSION_FROM_DATABASE != SplashScreen.DB_VERSION_INSIDE_TABLE) {
-                DatabaseHelper databaseHelper2 = new DatabaseHelper(context, SplashScreen.DB_NAME, SplashScreen.DB_VERSION, "DB_VERSION");
+            if (DB_VERSION_FROM_DATABASE != MyApplication.DB_VERSION_INSIDE_TABLE) {
+                DatabaseHelper databaseHelper2 = new DatabaseHelper(context, MyApplication.DB_NAME, MyApplication.DB_VERSION, "DB_VERSION");
                 databaseHelper2.db_delete();
             }
 
@@ -124,7 +124,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     public Cursor readRandomGirls() {
         SQLiteDatabase db = this.getWritableDatabase();
 
-        if (SplashScreen.App_updating.equals("inactive") && SplashScreen.userLoggedIn && SplashScreen.userLoggedIAs.equals("Google")) {
+        if (MyApplication.App_updating.equals("inactive") && MyApplication.userLoggedIn && MyApplication.userLoggedIAs.equals("Google")) {
 
             String query = "SELECT * FROM " + Database_tableNo + " WHERE LENGTH(images) > 50 ORDER BY RANDOM() LIMIT 30";
             Cursor cursor = db.rawQuery(query, null);
@@ -141,21 +141,23 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     public Cursor readSingleGirl(String username) {
 
         SQLiteDatabase db = this.getWritableDatabase();
-        Cursor cursor = db.query(Database_tableNo, null, "Username=?", new String[]{SplashScreen.encryption(username)}, null, null, null, null);
+        Cursor cursor = db.query(Database_tableNo, null, "Username=?", new String[]{Utils.encryption(username)}, null, null, null, null);
 
         return cursor;
 
     }
 
     public Cursor readGirls_Country(String countryName) {
+
+
         SQLiteDatabase db = this.getWritableDatabase();
-        if (SplashScreen.App_updating.equals("inactive") && SplashScreen.userLoggedIn && SplashScreen.userLoggedIAs.equals("Google")) {
+        if (MyApplication.App_updating.equals("inactive") && MyApplication.userLoggedIn && MyApplication.userLoggedIAs.equals("Google")) {
             if (countryName.equals("All")) {
                 String query = "SELECT * FROM " + Database_tableNo + " WHERE LENGTH(images) > 50 ORDER BY RANDOM() LIMIT 30";
                 Cursor cursor = db.rawQuery(query, null);
                 return cursor;
             } else {
-                Cursor cursor = db.query(Database_tableNo, null, "country=?", new String[]{countryName}, null, null, null, null);
+                Cursor cursor = db.query(Database_tableNo, null, "country=?", new String[]{countryName}, null, null, "RANDOM()", "40");
                 return cursor;
             }
 
@@ -185,10 +187,10 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         ContentValues contentValues = new ContentValues();
         contentValues.put("censored", censoredValue);
 
-        float res = sQLiteDatabase.update(Database_tableNo, contentValues, "Username = ?", new String[]{SplashScreen.encryption(username)});
+        float res = sQLiteDatabase.update(Database_tableNo, contentValues, "Username = ?", new String[]{Utils.encryption(username)});
         Log.d("sdafdsaf", "updateCensored: " + DbName);
         Log.d("sdafdsaf", "updateCensored: " + res);
-        Log.d("sdafdsaf", "updateCensored: " + SplashScreen.encryption(username));
+        Log.d("sdafdsaf", "updateCensored: " + Utils.encryption(username));
         if (res == -1)
             return "Failed";
         else
@@ -200,7 +202,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         ContentValues contentValues = new ContentValues();
         contentValues.put("selectedBot", selectedBot_Value);
 
-        float res = sQLiteDatabase.update(Database_tableNo, contentValues, "Username = ?", new String[]{encryption(username)});
+        float res = sQLiteDatabase.update(Database_tableNo, contentValues, "Username = ?", new String[]{Utils.encryption(username)});
         if (res == -1)
             return "Failed";
         else
@@ -212,61 +214,42 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         ContentValues contentValues = new ContentValues();
         contentValues.put("like", likeValue);
 
-        float res = sQLiteDatabase.update(Database_tableNo, contentValues, "Username = ?", new String[]{encryption(username)});
+        float res = sQLiteDatabase.update(Database_tableNo, contentValues, "Username = ?", new String[]{Utils.encryption(username)});
         if (res == -1)
             return "Failed";
         else
             return "Success";
     }
 
-    public String updateStoryParagraph(String title, String story) {
-        SQLiteDatabase db = this.getWritableDatabase();
-        ContentValues cv = new ContentValues();
-        cv.put("story", story);
-
-        float res = db.update(Database_tableNo, cv, "Title = ?", new String[]{encryption(title)});
-        if (res == -1)
-            return "Failed";
-        else
-            return "Liked";
-    }
-
-    public String updateStoryRead(String paramString, int paramInt) {
-        SQLiteDatabase sQLiteDatabase = getWritableDatabase();
-        ContentValues contentValues = new ContentValues();
-        contentValues.put("read", Integer.valueOf(paramInt));
-        return (sQLiteDatabase.update(Database_tableNo, contentValues, "Title = ?", new String[]{encryption(paramString)}) == -1.0F) ? "Failed" : "Liked";
-    }
-
-
     public String addProfiles(Model_Profile model_profile) {
+
 
         SQLiteDatabase db = this.getWritableDatabase();
         ContentValues values = new ContentValues();
-        values.put("Username", SplashScreen.encryption(model_profile.getUsername()));
-        values.put("Name", SplashScreen.encryption(model_profile.getName()));
+        values.put("Username", Utils.encryption(model_profile.getUsername()));
+        values.put("Name", Utils.encryption(model_profile.getName()));
         values.put("Country", model_profile.getFrom());
         values.put("Languages", model_profile.getLanguages());
         values.put("Age", model_profile.getAge());
         values.put("InterestedIn", model_profile.getInterestedIn());
         values.put("BodyType", model_profile.getBodyType());
-        values.put("Specifics", SplashScreen.encryption(model_profile.getSpecifics()));
+        values.put("Specifics", Utils.encryption(model_profile.getSpecifics()));
         values.put("Ethnicity", model_profile.getEthnicity());
         values.put("Hair", model_profile.getHair());
         values.put("EyeColor", model_profile.getEyeColor());
         values.put("Subculture", model_profile.getSubculture());
-        values.put("profilePhoto", SplashScreen.encryption(model_profile.getProfilePhoto()));
-        values.put("coverPhoto", SplashScreen.encryption(model_profile.getCoverPhoto()));
+        values.put("profilePhoto", Utils.encryption(model_profile.getProfilePhoto()));
+        values.put("coverPhoto", Utils.encryption(model_profile.getCoverPhoto()));
 
         Gson gson = new Gson();
         String interestsJson = gson.toJson(model_profile.getInterests());
-        values.put("Interests", SplashScreen.encryption(interestsJson));
+        values.put("Interests", Utils.encryption(interestsJson));
 
         String imagesJson = gson.toJson(model_profile.getImages());
-        values.put("images", SplashScreen.encryption(imagesJson));
+        values.put("images", Utils.encryption(imagesJson));
 
         String videos = gson.toJson(model_profile.getVideos());
-        values.put("videos", SplashScreen.encryption(videos));
+        values.put("videos", Utils.encryption(videos));
 
 
         float res = db.insert("GirlsProfile", null, values);
@@ -277,46 +260,6 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         else
             return "Sucess";
 
-    }
-
-    private String encryption(String text) {
-
-        int key = 5;
-        char[] chars = text.toCharArray();
-        String encryptedText = "";
-        String decryptedText = "";
-
-        //Encryption
-        for (char c : chars) {
-            c += key;
-            encryptedText = encryptedText + c;
-        }
-
-        //Decryption
-        char[] chars2 = encryptedText.toCharArray();
-        for (char c : chars2) {
-            c -= key;
-            decryptedText = decryptedText + c;
-        }
-        return encryptedText;
-    }
-
-    public String updateTitle(String title, String translatedTitle) {
-
-        String col_Title = "Title";
-        String col_href = "href";
-        String col_story = "story";
-
-
-        SQLiteDatabase db = this.getWritableDatabase();
-        ContentValues cv = new ContentValues();
-        cv.put("story", translatedTitle);
-
-        float res = db.update(Database_tableNo, cv, "Title = ?", new String[]{title});
-        if (res == -1)
-            return "Failed";
-        else
-            return "Success";
     }
 
 

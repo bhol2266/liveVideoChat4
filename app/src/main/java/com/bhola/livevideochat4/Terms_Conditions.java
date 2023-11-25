@@ -21,7 +21,7 @@ public class Terms_Conditions extends AppCompatActivity {
         webView.setWebViewClient(new WebViewClient());
         webView.getSettings().setJavaScriptEnabled(true);
 
-        String url = SplashScreen.terms_service_link;  // Replace with your desired URL
+        String url = MyApplication.terms_service_link;  // Replace with your desired URL
         webView.loadUrl(url);
 
         ImageView back_arrow=findViewById(R.id.back_arrow);

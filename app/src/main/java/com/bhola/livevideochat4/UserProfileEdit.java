@@ -376,7 +376,7 @@ public class UserProfileEdit extends AppCompatActivity {
 
 
 
-                    uploadImagetoFirebaseStorageProfile(copiedImageUri, "Users/" + String.valueOf(SplashScreen.userModel.getUserId()) + "/profile.jpg");
+                    uploadImagetoFirebaseStorageProfile(copiedImageUri, "Users/" + String.valueOf(MyApplication.userModel.getUserId()) + "/profile.jpg");
 
 
                 }
@@ -396,7 +396,7 @@ public class UserProfileEdit extends AppCompatActivity {
 
         long currentTimeMillis = System.currentTimeMillis();
         String currentTimeString = Long.toString(currentTimeMillis);
-        String path = "Users/" + String.valueOf(SplashScreen.userModel.getUserId()) + "/gallery/" + currentTimeString + ".jpg";
+        String path = "Users/" + String.valueOf(MyApplication.userModel.getUserId()) + "/gallery/" + currentTimeString + ".jpg";
         StorageReference imageRef = storageReference.child(path);
 
 
@@ -437,7 +437,7 @@ public class UserProfileEdit extends AppCompatActivity {
     private void updateGalleryonFireStore() {
         FirebaseFirestore db = FirebaseFirestore.getInstance();
         CollectionReference usersRef = db.collection("Users");
-        String userId = String.valueOf(SplashScreen.userModel.getUserId()); // Replace with the actual user ID
+        String userId = String.valueOf(MyApplication.userModel.getUserId()); // Replace with the actual user ID
         DocumentReference userDocRef = usersRef.document(userId);
 
         Map<String, Object> updates = new HashMap<>();
@@ -653,7 +653,7 @@ public class UserProfileEdit extends AppCompatActivity {
     }
 
     public void reflectChangesBtn(View view) {
-        startActivity(new Intent(UserProfileEdit.this, SplashScreen.class));
+        startActivity(new Intent(UserProfileEdit.this, MyApplication.class));
     }
 }
 
@@ -821,7 +821,7 @@ class GalleryImageAdapter extends RecyclerView.Adapter<GalleryImageAdapter.Image
 
         FirebaseFirestore db = FirebaseFirestore.getInstance();
         CollectionReference usersRef = db.collection("Users");
-        String userId = String.valueOf(SplashScreen.userModel.getUserId()); // Replace with the actual user ID
+        String userId = String.valueOf(MyApplication.userModel.getUserId()); // Replace with the actual user ID
         DocumentReference userDocRef = usersRef.document(userId);
 
         Map<String, Object> updates = new HashMap<>();

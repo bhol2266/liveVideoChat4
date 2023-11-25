@@ -67,13 +67,13 @@ public class ADS_ADMOB implements OnUserEarnedRewardListener {
                         // an ad is loaded.
                         mInterstitialAd[0] = interstitialAd;
                         mInterstitialAd[0].show((Activity) context);
-                        Log.i(SplashScreen.TAG, "onAdLoaded");
+                        Log.i(MyApplication.TAG, "onAdLoaded");
                     }
 
                     @Override
                     public void onAdFailedToLoad(@NonNull LoadAdError loadAdError) {
                         // Handle the error
-                        Log.d(SplashScreen.TAG, loadAdError.toString());
+                        Log.d(MyApplication.TAG, loadAdError.toString());
                         mInterstitialAd[0] = null;
                     }
                 });

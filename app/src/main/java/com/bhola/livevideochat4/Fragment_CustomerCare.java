@@ -7,14 +7,6 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Paint;
 import android.os.Bundle;
-
-import androidx.annotation.NonNull;
-import androidx.appcompat.app.AlertDialog;
-import androidx.cardview.widget.CardView;
-import androidx.fragment.app.Fragment;
-import androidx.recyclerview.widget.LinearLayoutManager;
-import androidx.recyclerview.widget.RecyclerView;
-
 import android.os.Handler;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -26,6 +18,13 @@ import android.widget.FrameLayout;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
+
+import androidx.annotation.NonNull;
+import androidx.appcompat.app.AlertDialog;
+import androidx.cardview.widget.CardView;
+import androidx.fragment.app.Fragment;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DataSnapshot;
@@ -149,7 +148,7 @@ public class Fragment_CustomerCare extends Fragment {
         messageAdapter = new MessageAdapter(context, messagesArrayList, recyclerview, chatRef);
         recyclerview.setAdapter(messageAdapter);
 
-        if (SplashScreen.userLoggedIAs.equals("Google")) {
+        if (MyApplication.userLoggedIAs.equals("Google")) {
             userEmail = FirebaseAuth.getInstance().getCurrentUser().getEmail();
             chatRef = FirebaseDatabase.getInstance().getReference().child("Users").child(userEmail.replace(".", "_")).child("customer_care");
 
@@ -190,18 +189,18 @@ public class Fragment_CustomerCare extends Fragment {
                 Message_Modelclass messages = new Message_Modelclass(message, date.getTime(), 1); //viewType 1 is sender 2 is receiver
                 messagesArrayList.add(messages);
 
-                if (SplashScreen.userLoggedIAs.equals("Google")) {
+                if (MyApplication.userLoggedIAs.equals("Google")) {
                     chatRef.push().setValue(messages, new DatabaseReference.CompletionListener() {
                         @Override
                         public void onComplete(DatabaseError databaseError, DatabaseReference databaseReference) {
                             if (databaseError == null) {
                                 // Value was successfully written to the database
                                 // Add your success logic here
-                                Log.d(SplashScreen.TAG, "Data saved successfully.: ");
+                                Log.d(MyApplication.TAG, "Data saved successfully.: ");
                             } else {
                                 // Failed to write value to the database
                                 // Add your failure logic here
-                                Log.d(SplashScreen.TAG, "Data saved Failed.: " + databaseError.getMessage());
+                                Log.d(MyApplication.TAG, "Data saved Failed.: " + databaseError.getMessage());
 
                             }
                         }
@@ -221,18 +220,18 @@ public class Fragment_CustomerCare extends Fragment {
                         messagesArrayList.add(msg);
                         recyclerview.scrollToPosition(messagesArrayList.size() - 1);
 
-                        if (SplashScreen.userLoggedIAs.equals("Google")) {
+                        if (MyApplication.userLoggedIAs.equals("Google")) {
                             chatRef.push().setValue(msg, new DatabaseReference.CompletionListener() {
                                 @Override
                                 public void onComplete(DatabaseError databaseError, DatabaseReference databaseReference) {
                                     if (databaseError == null) {
                                         // Value was successfully written to the database
                                         // Add your success logic here
-                                        Log.d(SplashScreen.TAG, "Data saved successfully.: ");
+                                        Log.d(MyApplication.TAG, "Data saved successfully.: ");
                                     } else {
                                         // Failed to write value to the database
                                         // Add your failure logic here
-                                        Log.d(SplashScreen.TAG, "Data saved Failed.: " + databaseError.getMessage());
+                                        Log.d(MyApplication.TAG, "Data saved Failed.: " + databaseError.getMessage());
 
                                     }
                                 }
@@ -267,7 +266,7 @@ public class Fragment_CustomerCare extends Fragment {
                 Message_Modelclass msg = new Message_Modelclass("preset", date.getTime(), 3); //viewType 1 is sender 2 is receiver
                 messagesArrayList.add(msg);
                 recyclerview.scrollToPosition(messagesArrayList.size() - 1);
-                if (SplashScreen.userLoggedIAs.equals("Google")) {
+                if (MyApplication.userLoggedIAs.equals("Google")) {
 
                     chatRef.addListenerForSingleValueEvent(new ValueEventListener() {
                         @Override
@@ -374,7 +373,7 @@ class MessageAdapter extends RecyclerView.Adapter {
             senderVierwHolder.timeStamp.setText(formattedDate);
 senderVierwHolder.errorLayout.setVisibility(View.GONE);
 
-            if (SplashScreen.userLoggedIAs.equals("Google")) {
+            if (MyApplication.userLoggedIAs.equals("Google")) {
                 SharedPreferences sh = context.getSharedPreferences("UserInfo", MODE_PRIVATE);
                 String urll = sh.getString("photoUrl", "not set");
                 Picasso.get()
@@ -464,7 +463,7 @@ senderVierwHolder.errorLayout.setVisibility(View.GONE);
 
 
     private void insertToDataBase(Message_Modelclass messages) {
-        if (SplashScreen.userLoggedIAs.equals("Google")) {
+        if (MyApplication.userLoggedIAs.equals("Google")) {
 
             String userEmail = FirebaseAuth.getInstance().getCurrentUser().getEmail();
             chatRef = FirebaseDatabase.getInstance().getReference().child("Users").child(userEmail.replace(".", "_")).child("customer_care");
@@ -475,11 +474,11 @@ senderVierwHolder.errorLayout.setVisibility(View.GONE);
                     if (databaseError == null) {
                         // Value was successfully written to the database
                         // Add your success logic here
-                        Log.d(SplashScreen.TAG, "Data saved successfully.: ");
+                        Log.d(MyApplication.TAG, "Data saved successfully.: ");
                     } else {
                         // Failed to write value to the database
                         // Add your failure logic here
-                        Log.d(SplashScreen.TAG, "Data saved Failed.: " + databaseError.getMessage());
+                        Log.d(MyApplication.TAG, "Data saved Failed.: " + databaseError.getMessage());
 
                     }
                 }

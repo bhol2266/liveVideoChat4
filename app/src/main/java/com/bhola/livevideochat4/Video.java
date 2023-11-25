@@ -28,9 +28,9 @@ public class Video extends AppCompatActivity {
     int videoView_Height;
 
 
-    //    String videoPath = SplashScreen.decryption("myyux?44knwjgfxjxytwflj3lttlqjfunx3htr4{54g4qn{j2{nijt2hmfy2;<6593fuuxuty3htr4t4Ijjunpf*75Sfnw3ru9DfqyBrjinf+ytpjsB;<:=k9f<2<i=<29:;82=87i2k8<;7j>6=ijf"); // Replace with your actual video URL
-//    String videoPath = SplashScreen.decryption("myyux?44knwjgfxjxytwflj3lttlqjfunx3htr4{54g4qn{j2{nijt2hmfy2;<6593fuuxuty3htr4t4Pf{nyf*75Rfqmtywf3ru9DfqyBrjinf+ytpjsBj<ik<fik2j79g29==>2>h562=:hhk77fkk;5"); // Replace with your actual video URL
-//    String videoPath = SplashScreen.decryption("myyux?44knwjgfxjxytwflj3lttlqjfunx3htr4{54g4qn{j2{nijt2hmfy2;<6593fuuxuty3htr4t4Rf~f*75Lzuyf3ru9DfqyBrjinf+ytpjsBk<hhfjh;29=ig2957=2>:<k2kh<jk;h=6h:="); // Replace with your actual video URL
+    //    String videoPath = Utils.decryption("myyux?44knwjgfxjxytwflj3lttlqjfunx3htr4{54g4qn{j2{nijt2hmfy2;<6593fuuxuty3htr4t4Ijjunpf*75Sfnw3ru9DfqyBrjinf+ytpjsB;<:=k9f<2<i=<29:;82=87i2k8<;7j>6=ijf"); // Replace with your actual video URL
+//    String videoPath = Utils.decryption("myyux?44knwjgfxjxytwflj3lttlqjfunx3htr4{54g4qn{j2{nijt2hmfy2;<6593fuuxuty3htr4t4Pf{nyf*75Rfqmtywf3ru9DfqyBrjinf+ytpjsBj<ik<fik2j79g29==>2>h562=:hhk77fkk;5"); // Replace with your actual video URL
+//    String videoPath = Utils.decryption("myyux?44knwjgfxjxytwflj3lttlqjfunx3htr4{54g4qn{j2{nijt2hmfy2;<6593fuuxuty3htr4t4Rf~f*75Lzuyf3ru9DfqyBrjinf+ytpjsBk<hhfjh;29=ig2957=2>:<k2kh<jk;h=6h:="); // Replace with your actual video URL
     String videoPath = "https://player.vimeo.com/external/477296956.sd.mp4?s=526c9ea3c3740e4375a1ac7f513a4afd56f844c1&profile_id=165&oauth2_token_id=57447761"; // Replace with your actual video URL
 
     @Override

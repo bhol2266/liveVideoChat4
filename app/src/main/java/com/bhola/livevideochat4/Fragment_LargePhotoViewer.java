@@ -10,6 +10,7 @@ import android.graphics.Shader;
 import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -173,16 +174,17 @@ class ImagePagerAdapter extends RecyclerView.Adapter<ImagePagerAdapter.ImageView
 
         public void bind(int position) {
 
+            Log.d("TAGA", "bind: "+imageUrls.get(position).get("url"));
 
             Picasso.get()
                     .load(imageUrls.get(position).get("url"))
                     .resize(screenWidth, 0)
                     .into(imageView);
 
-            if (SplashScreen.coins == 0) {
+            if (MyApplication.coins == 0) {
                 if (imageUrls.get(position).get("type").equals("premium")) {
                     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-                        if(SplashScreen.userLoggedIn && SplashScreen.userLoggedIAs.equals("Google")){
+                        if(MyApplication.userLoggedIn && MyApplication.userLoggedIAs.equals("Google")){
                         imageView.setRenderEffect(RenderEffect.createBlurEffect(100, 100, Shader.TileMode.MIRROR));
                         }else{
                             imageView.setRenderEffect(RenderEffect.createBlurEffect(200, 200, Shader.TileMode.MIRROR));

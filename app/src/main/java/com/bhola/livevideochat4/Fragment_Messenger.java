@@ -133,7 +133,7 @@ public class Fragment_Messenger extends Fragment {
         }
 
         String databaseRef = "";
-        if (SplashScreen.userLoggedIn && SplashScreen.userLoggedIAs.equals("Google") && SplashScreen.App_updating.equals("inactive")) {
+        if (MyApplication.userLoggedIn && MyApplication.userLoggedIAs.equals("Google") && MyApplication.App_updating.equals("inactive")) {
             databaseRef = "Chatbots_UnCensored/chatbots_uncensored";
         } else {
             databaseRef = "Chatbots_Censored/chatbots_censored";
@@ -161,7 +161,7 @@ public class Fragment_Messenger extends Fragment {
                             }
 
                             String profileImage = (String) userSnapshot.child("profileImage").getValue();
-                            profileImage = SplashScreen.databaseURL_images + profileImage;
+                            profileImage = MyApplication.databaseURL_images + profileImage;
                             Boolean booleanValue = userSnapshot.child("containsQuestion").getValue(Boolean.class);
                             boolean containsQuestion = booleanValue.booleanValue();
 
@@ -214,7 +214,7 @@ public class Fragment_Messenger extends Fragment {
                                 UserBotMsg userBotMsg = userBotMsgList.get(i);
                                 if (userBotMsg.getMimeType().equals("mimeType/image")) {
                                     Log.d("ASDfasd", "username: " + username);
-                                    userBotMsgList.get(i).setExtraMsg(SplashScreen.databaseURL_images + contentImages.get(Integer.parseInt(userBotMsg.getExtraMsg())));
+                                    userBotMsgList.get(i).setExtraMsg(MyApplication.databaseURL_images + contentImages.get(Integer.parseInt(userBotMsg.getExtraMsg())));
                                 }
                             }
 
@@ -223,7 +223,7 @@ public class Fragment_Messenger extends Fragment {
                                 for (int i = 0; i < questionWithAns.getReplyToUser().size(); i++) {
                                     UserBotMsg userBotMsg = questionWithAns.getReplyToUser().get(i);
                                     if (userBotMsg.getMimeType().equals("mimeType/image")) {
-                                        questionWithAns.getReplyToUser().get(i).setExtraMsg(SplashScreen.databaseURL_images + contentImages.get(Integer.parseInt(userBotMsg.getExtraMsg())));
+                                        questionWithAns.getReplyToUser().get(i).setExtraMsg(MyApplication.databaseURL_images + contentImages.get(Integer.parseInt(userBotMsg.getExtraMsg())));
                                     }
                                 }
                             }
@@ -250,7 +250,7 @@ public class Fragment_Messenger extends Fragment {
 
                     @Override
                     public void onCancelled(DatabaseError databaseError) {
-                        Log.d(SplashScreen.TAG, " userList.size(): " + databaseError.getMessage());
+                        Log.d(MyApplication.TAG, " userList.size(): " + databaseError.getMessage());
                     }
                 });
 
@@ -394,7 +394,7 @@ public class Fragment_Messenger extends Fragment {
         String json = gson.toJson(userListt);
 
 // Save the JSON string to SharedPreferences
-        if (SplashScreen.userLoggedIn && SplashScreen.userLoggedIAs.equals("Google")) {
+        if (MyApplication.userLoggedIn && MyApplication.userLoggedIAs.equals("Google")) {
             editor.putString("userListTemp_Google", json);
         } else {
             editor.putString("userListTemp_Guest", json);
@@ -408,7 +408,7 @@ public class Fragment_Messenger extends Fragment {
 
 // Retrieve the JSON string from SharedPreferences
         String json = "";
-        if (SplashScreen.userLoggedIn && SplashScreen.userLoggedIAs.equals("Google")) {
+        if (MyApplication.userLoggedIn && MyApplication.userLoggedIAs.equals("Google")) {
             json = sharedPreferences.getString("userListTemp_Google", null);
         } else {
             json = sharedPreferences.getString("userListTemp_Guest", null);
@@ -522,7 +522,7 @@ class MessengeItemsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
         String formattedTime = dateFormat.format(currentTime);
         userItem_viewholder.messageTime.setText(formattedTime);
 
-        Picasso.get().load(SplashScreen.databaseURL_images + modelClass.getProfileImage()).into(userItem_viewholder.profileUrl);
+        Picasso.get().load(MyApplication.databaseURL_images + modelClass.getProfileImage()).into(userItem_viewholder.profileUrl);
 
         userItem_viewholder.chatItemClick.setOnClickListener(new View.OnClickListener() {
             @Override

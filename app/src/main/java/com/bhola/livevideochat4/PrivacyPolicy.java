@@ -19,7 +19,7 @@ public class PrivacyPolicy extends AppCompatActivity {
         webView.setWebViewClient(new WebViewClient());
         webView.getSettings().setJavaScriptEnabled(true);
 
-        String url = SplashScreen.privacy_policy_link;  // Replace with your desired URL
+        String url = MyApplication.privacy_policy_link;  // Replace with your desired URL
         webView.loadUrl(url);
         ImageView back_arrow = findViewById(R.id.back_arrow);
         back_arrow.setOnClickListener(new View.OnClickListener() {

@@ -160,7 +160,7 @@ public class CameraActivity extends AppCompatActivity {
         setContentView(R.layout.activity_camera);
 //       fullscreenMode();
 
-        if (SplashScreen.Ads_State.equals("active")) {
+        if (MyApplication.Ads_State.equals("active")) {
             showAds();
         }
         actionbar();
@@ -243,7 +243,7 @@ public class CameraActivity extends AppCompatActivity {
     }
 
     private void getCall() {
-        if (SplashScreen.App_updating.equals("active")) {
+        if (MyApplication.App_updating.equals("active")) {
             return;
         }
         //storing these variable again because the call will come after 10s. so after 10s the model_profile may gets udpated
@@ -346,7 +346,7 @@ public class CameraActivity extends AppCompatActivity {
 
 
         girlsList = new ArrayList<>();
-        if (SplashScreen.App_updating.equals("active")) {
+        if (MyApplication.App_updating.equals("active")) {
             Girl girl = new Girl();
             girl.setUsername("Artlimbo");
             girl.setCensored(true);
@@ -392,12 +392,12 @@ public class CameraActivity extends AppCompatActivity {
 
             }
         });
-        String videoPath = SplashScreen.databaseURL_video + "InternationalChatVideos/" + girlsList.get(currentVideoIndex).getUsername() + ".mp4";
+        String videoPath = MyApplication.databaseURL_video + "InternationalChatVideos/" + girlsList.get(currentVideoIndex).getUsername() + ".mp4";
 
 
         getGirlProfile_DB(girlsList.get(currentVideoIndex).getUsername()); //this method is for reading single girl data from db top update name and use data for intent when user wants to goto profile
 
-        Log.d(SplashScreen.TAG, "videoPath: " + videoPath);
+        Log.d(MyApplication.TAG, "videoPath: " + videoPath);
 
 
         Uri videoUri = Uri.parse(videoPath);
@@ -463,9 +463,9 @@ public class CameraActivity extends AppCompatActivity {
         new Thread(new Runnable() {
             @Override
             public void run() {
-                Cursor cursor = new DatabaseHelper(CameraActivity.this, SplashScreen.DB_NAME, SplashScreen.DB_VERSION, "GirlsProfile").readSingleGirl(userName);
+                Cursor cursor = new DatabaseHelper(CameraActivity.this, MyApplication.DB_NAME, MyApplication.DB_VERSION, "GirlsProfile").readSingleGirl(userName);
                 if (cursor.moveToFirst()) {
-                    model_profile = SplashScreen.readCursor(cursor);
+                    model_profile = Utils.readCursor(cursor);
                 }
                 cursor.close();
                 ((Activity) CameraActivity.this).runOnUiThread(new Runnable() {
@@ -515,7 +515,7 @@ public class CameraActivity extends AppCompatActivity {
                 timeRemaining = 0;
                 if (currentVideoIndex < girlsList.size()) {
 
-                    if (SplashScreen.App_updating.equals("active")) {
+                    if (MyApplication.App_updating.equals("active")) {
                         onBackPressed();
                         return;
                     }
@@ -525,7 +525,7 @@ public class CameraActivity extends AppCompatActivity {
                     progressBarLayout.setVisibility(View.VISIBLE);
                     controlsLayout.setVisibility(View.GONE);
                     tapToReplyView.setVisibility(View.VISIBLE);
-                    String videoPath = SplashScreen.databaseURL_video + "InternationalChatVideos/" + girlsList.get(currentVideoIndex).getUsername() + ".mp4";
+                    String videoPath = MyApplication.databaseURL_video + "InternationalChatVideos/" + girlsList.get(currentVideoIndex).getUsername() + ".mp4";
 
 
                     Uri videoUri = Uri.parse(videoPath);
@@ -560,7 +560,7 @@ public class CameraActivity extends AppCompatActivity {
 
                 if (seconds == 0 && currentVideoIndex < girlsList.size()) {
 
-                    if (SplashScreen.App_updating.equals("active")) {
+                    if (MyApplication.App_updating.equals("active")) {
                         onBackPressed();
                         return;
                     }
@@ -570,7 +570,7 @@ public class CameraActivity extends AppCompatActivity {
                     progressBarLayout.setVisibility(View.VISIBLE);
                     controlsLayout.setVisibility(View.GONE);
                     tapToReplyView.setVisibility(View.VISIBLE);
-                    String videoPath = SplashScreen.databaseURL_video + "InternationalChatVideos/" + girlsList.get(currentVideoIndex).getUsername() + ".mp4";
+                    String videoPath = MyApplication.databaseURL_video + "InternationalChatVideos/" + girlsList.get(currentVideoIndex).getUsername() + ".mp4";
 
 
                     Uri videoUri = Uri.parse(videoPath);
@@ -641,7 +641,7 @@ public class CameraActivity extends AppCompatActivity {
 
             @Override
             public void onCancelled(DatabaseError databaseError) {
-                Log.d(SplashScreen.TAG, " userList.size(): " + databaseError.getMessage());
+                Log.d(MyApplication.TAG, " userList.size(): " + databaseError.getMessage());
 
             }
         });
@@ -651,7 +651,7 @@ public class CameraActivity extends AppCompatActivity {
 
     private void filterGirlList() {
         Iterator<Girl> iterator = girlsList.iterator();
-        if (SplashScreen.userLoggedIn && SplashScreen.userLoggedIAs.equals("Google") && SplashScreen.App_updating.equals("inactive")) {
+        if (MyApplication.userLoggedIn && MyApplication.userLoggedIAs.equals("Google") && MyApplication.App_updating.equals("inactive")) {
 
         } else {
 
@@ -1019,7 +1019,7 @@ public class CameraActivity extends AppCompatActivity {
     }
 
     private void showAds() {
-        if (SplashScreen.Ad_Network_Name.equals("admob")) {
+        if (MyApplication.Ad_Network_Name.equals("admob")) {
             ADS_ADMOB.Interstitial_Ad(this);
         } else {
             com.facebook.ads.InterstitialAd facebook_IntertitialAds = null;

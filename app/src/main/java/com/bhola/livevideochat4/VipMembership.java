@@ -126,7 +126,7 @@ public class VipMembership extends AppCompatActivity {
                             progressBar.setVisibility(View.GONE);
 
                             cancelScheduledAlarm();
-                            startActivity(new Intent(VipMembership.this, SplashScreen.class));
+                            startActivity(new Intent(VipMembership.this, MyApplication.class));
 
                         }
                     }, 5000);
@@ -440,7 +440,7 @@ public class VipMembership extends AppCompatActivity {
             @Override
             public void onConsumeResponse(@NonNull BillingResult billingResult, @NonNull String s) {
                 if (billingResult.getResponseCode() == BillingClient.BillingResponseCode.OK) {
-                    Log.d(SplashScreen.TAG, "Consumed: ");
+                    Log.d(MyApplication.TAG, "Consumed: ");
                 }
             }
         });
@@ -492,7 +492,7 @@ public class VipMembership extends AppCompatActivity {
                 // Error occurred while retrieving the document
                 FirebaseFirestoreException exception = (FirebaseFirestoreException) task.getException();
                 // Handle the exception
-                Log.d(SplashScreen.TAG, "FirebaseFirestoreException: " + exception.getMessage());
+                Log.d(MyApplication.TAG, "FirebaseFirestoreException: " + exception.getMessage());
             }
         });
 
@@ -757,7 +757,7 @@ public class VipMembership extends AppCompatActivity {
 
     @Override
     public void onBackPressed() {
-        Log.d(SplashScreen.TAG, "backpressCount: " + backpressCount);
+        Log.d(MyApplication.TAG, "backpressCount: " + backpressCount);
         if (backpressCount == 0) {
             exit_dialog();
             backpressCount++;

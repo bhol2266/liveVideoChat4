@@ -92,14 +92,14 @@ public class Fragment_UserProfile extends Fragment {
         int userId = sh.getInt("userId", 0);
 
         id.setText(String.valueOf(userId));
-        coins.setText(String.valueOf("Coins: " + SplashScreen.coins));
+        coins.setText(String.valueOf("Coins: " + MyApplication.coins));
         logout = view.findViewById(R.id.logout);
         logout.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 GoogleSignInOptions gso;
                 GoogleSignInClient gsc;
-                if (SplashScreen.userLoggedIAs.equals("Google")) {
+                if (MyApplication.userLoggedIAs.equals("Google")) {
                     gso = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN).requestEmail().build();
                     gsc = GoogleSignIn.getClient(context, gso);
                     gsc.signOut().addOnCompleteListener(new com.google.android.gms.tasks.OnCompleteListener<Void>() {
@@ -147,12 +147,12 @@ public class Fragment_UserProfile extends Fragment {
         new Handler().postDelayed(new Runnable() {
             @Override
             public void run() {
-                location.setText(SplashScreen.currentCity);
+                location.setText(MyApplication.currentCity);
             }
         }, 2000);
 
 
-        if (SplashScreen.userLoggedIn) {
+        if (MyApplication.userLoggedIn) {
 
             String fullname = sh.getString("nickName", "not set");
             name.setText(fullname);

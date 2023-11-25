@@ -69,7 +69,7 @@ public class Vip_CustomAdapter extends RecyclerView.Adapter<Vip_CustomAdapter.Vi
             coinsCount.setText("3000");
         }
 
-        Log.d(SplashScreen.TAG, "position: " + productDetails.getOneTimePurchaseOfferDetails().getFormattedPrice());
+        Log.d(MyApplication.TAG, "position: " + productDetails.getOneTimePurchaseOfferDetails().getFormattedPrice());
 
         price.setText(productDetails.getOneTimePurchaseOfferDetails().getFormattedPrice().replace(".00", ""));
         if (offer.equals("with offer")) {

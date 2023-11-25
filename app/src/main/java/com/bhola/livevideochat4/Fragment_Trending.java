@@ -157,11 +157,11 @@ public class Fragment_Trending extends Fragment {
         NearbyTextview.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                if (SplashScreen.App_updating.equals("active")) {
+                if (MyApplication.App_updating.equals("active")) {
                     return;
                 }
 
-                if (SplashScreen.currentCountry.equals("")) {
+                if (MyApplication.currentCountry.equals("")) {
                     return;
                 }
                 if (ContextCompat.checkSelfPermission(requireActivity(), Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
@@ -204,7 +204,7 @@ public class Fragment_Trending extends Fragment {
         swipeRefreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
             @Override
             public void onRefresh() {
-                if (SplashScreen.App_updating.equals("active")) {
+                if (MyApplication.App_updating.equals("active")) {
                     return;
                 }
                 Fragment_Trending.selectedCountry = "All";
@@ -237,7 +237,7 @@ public class Fragment_Trending extends Fragment {
         openDrawer.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                if (SplashScreen.App_updating.equals("active")) {
+                if (MyApplication.App_updating.equals("active")) {
                     return;
                 }
                 if (drawerLayout.isDrawerOpen(GravityCompat.END)) {
@@ -247,8 +247,8 @@ public class Fragment_Trending extends Fragment {
                 }
             }
         });
-
-        countrylist_forRecyclerview = new ArrayList<>(SplashScreen.countryList);
+        countrylist_forRecyclerview = new ArrayList<>();
+        countrylist_forRecyclerview.addAll(MyApplication.countryList);
 
 
         CountryInfo_Model countryInfoModel = new CountryInfo_Model();
@@ -259,10 +259,10 @@ public class Fragment_Trending extends Fragment {
 
         countrylist_forRecyclerview.add(0, countryInfoModel);
 
-        countryRecyclerViewAdapter = new CountryRecyclerViewAdapter(requireContext(), countrylist_forRecyclerview);
+        countryRecyclerViewAdapter = new CountryRecyclerViewAdapter(context,countrylist_forRecyclerview);
 
         RecyclerView recyclerView = view.findViewById(R.id.recycler_view);
-        recyclerView.setLayoutManager(new LinearLayoutManager(requireContext()));
+        recyclerView.setLayoutManager(new LinearLayoutManager(context));
         recyclerView.setAdapter(countryRecyclerViewAdapter);
 
 
@@ -276,8 +276,8 @@ public class Fragment_Trending extends Fragment {
         recyclerview_NearBy = view.findViewById(R.id.recyclerview_NearBy);
 
 
-        if (SplashScreen.currentCountry.length() != 0) {
-            loadDatabase_Country_NearBy(SplashScreen.currentCountry);
+        if (MyApplication.currentCountry.length() != 0) {
+            loadDatabase_Country_NearBy(MyApplication.currentCountry);
         } else {
             loadDatabase_NearBy();
         }
@@ -338,10 +338,10 @@ public class Fragment_Trending extends Fragment {
         new Thread(new Runnable() {
             @Override
             public void run() {
-                Cursor cursor = new DatabaseHelper(context, SplashScreen.DB_NAME, SplashScreen.DB_VERSION, "GirlsProfile").readRandomGirls();
+                Cursor cursor = new DatabaseHelper(context, MyApplication.DB_NAME, MyApplication.DB_VERSION, "GirlsProfile").readRandomGirls();
                 if (cursor.moveToFirst()) {
                     do {
-                        girlsList_slider.add(SplashScreen.readCursor(cursor));
+                        girlsList_slider.add(Utils.readCursor(cursor));
                     } while (cursor.moveToNext());
 
                 }
@@ -350,7 +350,7 @@ public class Fragment_Trending extends Fragment {
                     @Override
                     public void run() {
 
-                        if (SplashScreen.App_updating.equals("active")) {
+                        if (MyApplication.App_updating.equals("active")) {
                             if (girlsList_slider.size() > 4) {
                                 girlsList_slider.subList(4, girlsList_slider.size()).clear();
                             }
@@ -404,10 +404,10 @@ public class Fragment_Trending extends Fragment {
         new Thread(new Runnable() {
             @Override
             public void run() {
-                Cursor cursor = new DatabaseHelper(context, SplashScreen.DB_NAME, SplashScreen.DB_VERSION, "GirlsProfile").readRandomGirls();
+                Cursor cursor = new DatabaseHelper(context, MyApplication.DB_NAME, MyApplication.DB_VERSION, "GirlsProfile").readRandomGirls();
                 if (cursor.moveToFirst()) {
                     do {
-                        girlsList.add(SplashScreen.readCursor(cursor));
+                        girlsList.add(Utils.readCursor(cursor));
                     } while (cursor.moveToNext());
 
                 }
@@ -427,7 +427,7 @@ public class Fragment_Trending extends Fragment {
                             @Override
                             public void run() {
 
-                                if (SplashScreen.App_updating.equals("active")) {
+                                if (MyApplication.App_updating.equals("active")) {
                                     if (girlsList.size() > 6) {
                                         girlsList.subList(6, girlsList.size()).clear();
                                     }
@@ -454,7 +454,7 @@ public class Fragment_Trending extends Fragment {
             for (Model_Profile model_profile : girlsList) {
 
                 String nationality = "";
-                for (CountryInfo_Model countryInfo_model : SplashScreen.countryList) {
+                for (CountryInfo_Model countryInfo_model : MyApplication.countryList) {
                     if (model_profile.getFrom().equals(countryInfo_model.getCountry())) {
                         nationality = countryInfo_model.getNationality();
                     }
@@ -467,7 +467,7 @@ public class Fragment_Trending extends Fragment {
 
                 JSONArray imagesArray = new JSONArray();
                 for (int i = 0; i < model_profile.getImages().size(); i++) {
-                    imagesArray.put(SplashScreen.databaseURL_images + "VideoChatProfiles/" + nationality + "/" + model_profile.getUsername() + "/" + String.valueOf(i) + ".jpg");
+                    imagesArray.put(MyApplication.databaseURL_images + "VideoChatProfiles/" + nationality + "/" + model_profile.getUsername() + "/" + String.valueOf(i) + ".jpg");
                 }
                 object1.put("images", imagesArray);
                 jsonArray.put(object1);
@@ -479,7 +479,7 @@ public class Fragment_Trending extends Fragment {
             fileWriter.close();
 
         } catch (Exception e) {
-            Log.d(SplashScreen.TAG, "run: " + e.getMessage());
+            Log.d(MyApplication.TAG, "run: " + e.getMessage());
         }
 
 
@@ -488,7 +488,7 @@ public class Fragment_Trending extends Fragment {
 
     private void getLocation() {
 
-        if (SplashScreen.App_updating.equals("active")) {
+        if (MyApplication.App_updating.equals("active")) {
             loadDatabase();
             return;
         }
@@ -520,17 +520,17 @@ public class Fragment_Trending extends Fragment {
         try {
             List<Address> addresses = geocoder.getFromLocation(latitude, longitude, 1);
             if (addresses.size() > 0) {
-                SplashScreen.currentCity = addresses.get(0).getLocality();
-                SplashScreen.currentCountry = addresses.get(0).getCountryName();
+                MyApplication.currentCity = addresses.get(0).getLocality();
+                MyApplication.currentCountry = addresses.get(0).getCountryName();
                 // Now you have the city and country information
 
                 updateLocationFireStore();
                 showNearBy();
 
                 boolean countryAvailable = false;
-                for (int i = 0; i < SplashScreen.countryList.size(); i++) {
-                    CountryInfo_Model countryInfo_model = SplashScreen.countryList.get(i);
-                    if (SplashScreen.currentCountry.equalsIgnoreCase(countryInfo_model.getCountry().trim())) {
+                for (int i = 0; i < MyApplication.countryList.size(); i++) {
+                    CountryInfo_Model countryInfo_model = MyApplication.countryList.get(i);
+                    if (MyApplication.currentCountry.equalsIgnoreCase(countryInfo_model.getCountry().trim())) {
                         countryAvailable = true;
                         loadDatabase_Country(countryInfo_model.getCountry().trim());
                     }
@@ -544,7 +544,7 @@ public class Fragment_Trending extends Fragment {
                 int fromIndex = -1;
                 for (int i = 0; i < countrylist_forRecyclerview.size(); i++) {
                     CountryInfo_Model countryInfoModel1 = countrylist_forRecyclerview.get(i);
-                    if (SplashScreen.currentCountry.equals(countryInfoModel1.getCountry())) {
+                    if (MyApplication.currentCountry.equals(countryInfoModel1.getCountry())) {
                         fromIndex = i; // Index of the item to move
                     }
                 }
@@ -563,11 +563,11 @@ public class Fragment_Trending extends Fragment {
     private void updateLocationFireStore() {
         FirebaseFirestore db = FirebaseFirestore.getInstance();
         CollectionReference usersRef = db.collection("Users");
-        String userId = String.valueOf(SplashScreen.userModel.getUserId());
+        String userId = String.valueOf(MyApplication.userModel.getUserId());
         DocumentReference userDocRef = usersRef.document(userId);
 
         Map<String, Object> updates = new HashMap<>();
-        updates.put("location", SplashScreen.currentCity);
+        updates.put("location", MyApplication.currentCity);
 
         userDocRef.update(updates)
                 .addOnSuccessListener(aVoid -> {
@@ -587,11 +587,11 @@ public class Fragment_Trending extends Fragment {
         new Thread(new Runnable() {
             @Override
             public void run() {
-                Cursor cursor = new DatabaseHelper(context, SplashScreen.DB_NAME, SplashScreen.DB_VERSION, "GirlsProfile").readGirls_Country(selectedCountry);
+                Cursor cursor = new DatabaseHelper(context, MyApplication.DB_NAME, MyApplication.DB_VERSION, "GirlsProfile").readGirls_Country(selectedCountry);
                 if (cursor.moveToFirst()) {
                     do {
 
-                        Model_Profile model_profile = SplashScreen.readCursor(cursor);
+                        Model_Profile model_profile = Utils.readCursor(cursor);
                         if (model_profile.getImages().size() != 0) {
                             girlsList.add(0, model_profile);
                         } else {
@@ -609,7 +609,7 @@ public class Fragment_Trending extends Fragment {
                             @Override
                             public void run() {
                                 Collections.shuffle(girlsList);
-                                if (SplashScreen.App_updating.equals("active")) {
+                                if (MyApplication.App_updating.equals("active")) {
                                     if (girlsList.size() > 6) {
                                         girlsList.subList(6, girlsList.size()).clear();
                                     }
@@ -652,10 +652,10 @@ public class Fragment_Trending extends Fragment {
         new Thread(new Runnable() {
             @Override
             public void run() {
-                Cursor cursor = new DatabaseHelper(context, SplashScreen.DB_NAME, SplashScreen.DB_VERSION, "GirlsProfile").readGirls_Country(selectedCountry);
+                Cursor cursor = new DatabaseHelper(context, MyApplication.DB_NAME, MyApplication.DB_VERSION, "GirlsProfile").readGirls_Country(selectedCountry);
                 if (cursor.moveToFirst()) {
                     do {
-                        girlsList_nearBy.add(SplashScreen.readCursor(cursor));
+                        girlsList_nearBy.add(Utils.readCursor(cursor));
 
                     } while (cursor.moveToNext());
 
@@ -691,10 +691,10 @@ public class Fragment_Trending extends Fragment {
         new Thread(new Runnable() {
             @Override
             public void run() {
-                Cursor cursor = new DatabaseHelper(context, SplashScreen.DB_NAME, SplashScreen.DB_VERSION, "GirlsProfile").readRandomGirls();
+                Cursor cursor = new DatabaseHelper(context, MyApplication.DB_NAME, MyApplication.DB_VERSION, "GirlsProfile").readRandomGirls();
                 if (cursor.moveToFirst()) {
                     do {
-                        girlsList_nearBy.add(SplashScreen.readCursor(cursor));
+                        girlsList_nearBy.add(Utils.readCursor(cursor));
                     } while (cursor.moveToNext());
 
                 }
@@ -729,7 +729,7 @@ public class Fragment_Trending extends Fragment {
             new ActivityResultCallback<Boolean>() {
                 @Override
                 public void onActivityResult(Boolean result) {
-                    Log.d(SplashScreen.TAG, "requestCode: " + result);
+                    Log.d(MyApplication.TAG, "requestCode: " + result);
                     if (result) {
                         getLocation();
                         askForNotificationPermission();
@@ -810,7 +810,7 @@ class GirlsCardAdapter extends RecyclerView.Adapter<GirlsCardAdapter.GridViewHol
         holder.name.setText(item.getName());
         Picasso.get().load(item.getProfilePhoto()).into(holder.profile);
 
-        for (CountryInfo_Model countryMap : SplashScreen.countryList) {
+        for (CountryInfo_Model countryMap : MyApplication.countryList) {
             if (item.getFrom().equals(countryMap.getCountry())) {
                 loadImageview(holder.flag, countryMap.getCountry());
             }
@@ -887,7 +887,7 @@ class GirlsCardAdapter extends RecyclerView.Adapter<GirlsCardAdapter.GridViewHol
             public void onClick(View view) {
 
                 if (censored == 0) {
-                    String res = new DatabaseHelper(context, SplashScreen.DB_NAME, SplashScreen.DB_VERSION, "GirlsProfile").updateCensored(username, 1);
+                    String res = new DatabaseHelper(context, MyApplication.DB_NAME, MyApplication.DB_VERSION, "GirlsProfile").updateCensored(username, 1);
 
                     censoredBtn.setBackgroundColor(context.getResources().getColor(R.color.green));
                     censoredBtn.setText("Censored");
@@ -897,7 +897,7 @@ class GirlsCardAdapter extends RecyclerView.Adapter<GirlsCardAdapter.GridViewHol
                         }
                     }
                 } else {
-                    String res = new DatabaseHelper(context, SplashScreen.DB_NAME, SplashScreen.DB_VERSION, "GirlsProfile").updateCensored(username, 0);
+                    String res = new DatabaseHelper(context, MyApplication.DB_NAME, MyApplication.DB_VERSION, "GirlsProfile").updateCensored(username, 0);
 
                     censoredBtn.setBackgroundColor(context.getResources().getColor(R.color.themeColor)); // Assumes you have a green color defined in your resources
                     censoredBtn.setText("Not Censored");
@@ -1232,11 +1232,11 @@ class CountryRecyclerViewAdapter extends RecyclerView.Adapter<CountryRecyclerVie
         new Thread(new Runnable() {
             @Override
             public void run() {
-                Cursor cursor = new DatabaseHelper(context, SplashScreen.DB_NAME, SplashScreen.DB_VERSION, "GirlsProfile").readGirls_Country(selectedCountry);
+                Cursor cursor = new DatabaseHelper(context, MyApplication.DB_NAME, MyApplication.DB_VERSION, "GirlsProfile").readGirls_Country(selectedCountry);
                 if (cursor.moveToFirst()) {
                     do {
 
-                        Model_Profile model_profile = SplashScreen.readCursor(cursor);
+                        Model_Profile model_profile = Utils.readCursor(cursor);
                         if (model_profile.getImages().size() != 0) {
                             Fragment_Trending.girlsList.add(0, model_profile);
                         } else {

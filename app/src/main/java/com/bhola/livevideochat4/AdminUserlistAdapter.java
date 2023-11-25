@@ -107,12 +107,12 @@ public class AdminUserlistAdapter extends RecyclerView.Adapter<AdminUserlistAdap
 
         holder.profileImage.setOnClickListener(view -> {
             String userModelJson = new Gson().toJson(item); // Using Google's Gson library for JSON serialization
-            Intent intent = new Intent(context, Profile.class);
+            Intent intent = new Intent(context, Profile2.class);
             intent.putExtra("userModelJson", userModelJson);
             context.startActivity(intent);
         });
         holder.delete.setOnClickListener(view -> {
-            if (item.getUserId() == SplashScreen.userModel.getUserId()) {
+            if (item.getUserId() == MyApplication.userModel.getUserId()) {
                 Toast.makeText(context, "you cannot delete yourself", Toast.LENGTH_SHORT).show();
                 return;
             }

@@ -47,9 +47,9 @@ public class FirebaseUtil {
 
     public static void addUserCoins(int newCoins) {
 
-        int currentCoin = SplashScreen.userModel.getCoins();
+        int currentCoin = MyApplication.userModel.getCoins();
         int coinsAfterAdding = currentCoin + newCoins;
-        SplashScreen.userModel.setCoins(coinsAfterAdding);
+        MyApplication.userModel.setCoins(coinsAfterAdding);
         updateUserCoinsonFireStore(coinsAfterAdding);
 
     }
@@ -57,7 +57,7 @@ public class FirebaseUtil {
     public static void updateUserCoinsonFireStore(int value) {
         FirebaseFirestore db = FirebaseFirestore.getInstance();
         CollectionReference usersRef = db.collection("Users");
-        String userId = String.valueOf(SplashScreen.userModel.getUserId()); // Replace with the actual user ID
+        String userId = String.valueOf(MyApplication.userModel.getUserId()); // Replace with the actual user ID
         DocumentReference userDocRef = usersRef.document(userId);
 
         Map<String, Object> updates = new HashMap<>();

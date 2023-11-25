@@ -61,7 +61,7 @@ public class Profile extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        if (SplashScreen.Ads_State.equals("active")) {
+        if (MyApplication.Ads_State.equals("active")) {
 //            showAds();
         }
 
@@ -107,14 +107,14 @@ public class Profile extends AppCompatActivity {
             public void onClick(View view) {
 
                 if (model_profile.getSelectedBot() == 0) {
-                    String res = new DatabaseHelper(Profile.this, SplashScreen.DB_NAME, SplashScreen.DB_VERSION, "GirlsProfile").selectedBot(model_profile.getUsername(), 1);
+                    String res = new DatabaseHelper(Profile.this, MyApplication.DB_NAME, MyApplication.DB_VERSION, "GirlsProfile").selectedBot(model_profile.getUsername(), 1);
 
                     selectBotBtn.setBackgroundColor(getResources().getColor(R.color.green));
                     selectBotBtn.setText("Selected Bot");
                     model_profile.setSelectedBot(1);
 
                 } else {
-                    String res = new DatabaseHelper(Profile.this, SplashScreen.DB_NAME, SplashScreen.DB_VERSION, "GirlsProfile").selectedBot(model_profile.getUsername(), 0);
+                    String res = new DatabaseHelper(Profile.this, MyApplication.DB_NAME, MyApplication.DB_VERSION, "GirlsProfile").selectedBot(model_profile.getUsername(), 0);
 
                     selectBotBtn.setBackgroundColor(getResources().getColor(R.color.themeColor)); // Assumes you have a green color defined in your resources
                     selectBotBtn.setText("Not Selected");
@@ -142,14 +142,14 @@ public class Profile extends AppCompatActivity {
             public void onClick(View view) {
 
                 if (model_profile.getLike() == 0) {
-                    String res = new DatabaseHelper(Profile.this, SplashScreen.DB_NAME, SplashScreen.DB_VERSION, "GirlsProfile").updateLike(model_profile.getUsername(), 1);
+                    String res = new DatabaseHelper(Profile.this, MyApplication.DB_NAME, MyApplication.DB_VERSION, "GirlsProfile").updateLike(model_profile.getUsername(), 1);
 
                     likeBtn.setBackgroundColor(getResources().getColor(R.color.green));
                     likeBtn.setText("liked Bot");
                     model_profile.setLike(1);
 
                 } else {
-                    String res = new DatabaseHelper(Profile.this, SplashScreen.DB_NAME, SplashScreen.DB_VERSION, "GirlsProfile").updateLike(model_profile.getUsername(), 0);
+                    String res = new DatabaseHelper(Profile.this, MyApplication.DB_NAME, MyApplication.DB_VERSION, "GirlsProfile").updateLike(model_profile.getUsername(), 0);
 
                     likeBtn.setBackgroundColor(getResources().getColor(R.color.themeColor)); // Assumes you have a green color defined in your resources
                     likeBtn.setText("Not liked");
@@ -190,7 +190,7 @@ public class Profile extends AppCompatActivity {
             }
         });
         TextView coinCount = view.findViewById(R.id.coin);
-        coinCount.setText(String.valueOf(SplashScreen.coins));
+        coinCount.setText(String.valueOf(MyApplication.coins));
         TextView topup = view.findViewById(R.id.topup);
         topup.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -296,7 +296,7 @@ public class Profile extends AppCompatActivity {
         TextView Specifics = findViewById(R.id.Specifics);
         Specifics.setText(model_profile.getSpecifics());
         LinearLayout Specificslayout = findViewById(R.id.Specificslayout);
-        if (model_profile.getSpecifics().length() == 0 || SplashScreen.App_updating.equals("active") || !SplashScreen.userLoggedIAs.equals("Google")) {
+        if (model_profile.getSpecifics().length() == 0 || MyApplication.App_updating.equals("active") || !MyApplication.userLoggedIAs.equals("Google")) {
             Specificslayout.setVisibility(View.GONE);
         }
 
@@ -511,10 +511,10 @@ public class Profile extends AppCompatActivity {
         new Thread(new Runnable() {
             @Override
             public void run() {
-                Cursor cursor = new DatabaseHelper(Profile.this, SplashScreen.DB_NAME, SplashScreen.DB_VERSION, "GirlsProfile").readSingleGirl(userName);
+                Cursor cursor = new DatabaseHelper(Profile.this, MyApplication.DB_NAME, MyApplication.DB_VERSION, "GirlsProfile").readSingleGirl(userName);
                 if (cursor.moveToFirst()) {
 
-                    model_profile = SplashScreen.readCursor(cursor);
+                    model_profile = Utils.readCursor(cursor);
                 }
                 cursor.close();
                 ((Activity) Profile.this).runOnUiThread(new Runnable() {
@@ -543,7 +543,7 @@ public class Profile extends AppCompatActivity {
 
 
     private void setImageinGridLayout() {
-        if (SplashScreen.App_updating.equals("active")) {
+        if (MyApplication.App_updating.equals("active")) {
             return;
         }
         ArrayList<Map<String, String>> imageList = new ArrayList<>();
@@ -592,7 +592,7 @@ public class Profile extends AppCompatActivity {
     }
 
     private void showAds() {
-        if (SplashScreen.Ad_Network_Name.equals("admob")) {
+        if (MyApplication.Ad_Network_Name.equals("admob")) {
             ADS_ADMOB.Interstitial_Ad(this);
         } else {
             com.facebook.ads.InterstitialAd facebook_IntertitialAds = null;
@@ -670,7 +670,7 @@ class ProfileGirlImageAdapter extends RecyclerView.Adapter<ProfileGirlImageAdapt
         int heightInPixels = (int) (widthInPixels * 3.5 / 4); // Calculate the height
 
 
-        if (SplashScreen.coins == 0) {
+        if (MyApplication.coins == 0) {
 
             if (imageItem.get("type").equals("premium")) {
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {

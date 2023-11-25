@@ -116,7 +116,7 @@ public class ChatScreen_User extends Activity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_chat_screen_user);
 
-        if (SplashScreen.Ads_State.equals("active")) {
+        if (MyApplication.Ads_State.equals("active")) {
             showAds();
         }
 
@@ -238,12 +238,12 @@ public class ChatScreen_User extends Activity {
 
 
         String nationality = "";
-        for (CountryInfo_Model countryInfo_model : SplashScreen.countryList) {
+        for (CountryInfo_Model countryInfo_model : MyApplication.countryList) {
             if (modelProfile.getFrom().equals(countryInfo_model.getCountry())) {
                 nationality = countryInfo_model.getNationality();
             }
         }
-        String profileImage = SplashScreen.databaseURL_images + "VideoChatProfiles/" + nationality + "/" + modelProfile.getUsername() + "/profile.jpg";
+        String profileImage = MyApplication.databaseURL_images + "VideoChatProfiles/" + nationality + "/" + modelProfile.getUsername() + "/profile.jpg";
         boolean containsQuestion = false;
 
         String recommendationType = "Recommended";
@@ -282,9 +282,9 @@ public class ChatScreen_User extends Activity {
         new Thread(new Runnable() {
             @Override
             public void run() {
-                Cursor cursor = new DatabaseHelper(ChatScreen_User.this, SplashScreen.DB_NAME, SplashScreen.DB_VERSION, "GirlsProfile").readSingleGirl(userName);
+                Cursor cursor = new DatabaseHelper(ChatScreen_User.this, MyApplication.DB_NAME, MyApplication.DB_VERSION, "GirlsProfile").readSingleGirl(userName);
                 if (cursor.moveToFirst()) {
-                    model_profile[0] = SplashScreen.readCursor(cursor);
+                    model_profile[0] = Utils.readCursor(cursor);
                 }
                 cursor.close();
                 ((Activity) ChatScreen_User.this).runOnUiThread(new Runnable() {
@@ -538,12 +538,16 @@ public class ChatScreen_User extends Activity {
 
     private void smartReply(String msg) {
 
+
         try {
             Random random = new Random();
             int randomNumber = random.nextInt(10 - 5) + 5;
             conversation.clear();
             conversation.add(FirebaseTextMessage.createForRemoteUser(
                     msg, System.currentTimeMillis(), "sadfsadf"));
+            if (conversation.isEmpty()) {
+                return;
+            }
             new Handler().postDelayed(new Runnable() {
                 @Override
                 public void run() {
@@ -1328,7 +1332,7 @@ public class ChatScreen_User extends Activity {
             }
         });
         TextView coinCount = view.findViewById(R.id.coin);
-        coinCount.setText(String.valueOf(SplashScreen.coins));
+        coinCount.setText(String.valueOf(MyApplication.coins));
         TextView topup = view.findViewById(R.id.topup);
         topup.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -1388,7 +1392,7 @@ public class ChatScreen_User extends Activity {
     }
 
     private void showAds() {
-        if (SplashScreen.Ad_Network_Name.equals("admob")) {
+        if (MyApplication.Ad_Network_Name.equals("admob")) {
             ADS_ADMOB.Interstitial_Ad(this);
         } else {
             com.facebook.ads.InterstitialAd facebook_IntertitialAds = null;

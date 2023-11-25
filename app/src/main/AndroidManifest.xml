@@ -39,6 +39,7 @@
     <uses-permission android:name="android.permission.RECORD_AUDIO" />
 
     <application
+        android:name=".MyApplication"
         android:allowBackup="false"
         android:dataExtractionRules="@xml/data_extraction_rules"
         android:fullBackupContent="@xml/backup_rules"
@@ -97,6 +98,9 @@
             android:exported="false" />
         <activity
             android:name=".LoginScreen"
+            android:exported="false" />
+        <activity
+            android:name=".Profile2"
             android:exported="false" />
         <activity
             android:name=".CameraActivity"

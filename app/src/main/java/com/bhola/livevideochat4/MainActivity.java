@@ -55,14 +55,14 @@ public class MainActivity extends AppCompatActivity {
         checkForupdate();
 
 
-
-        if (SplashScreen.Ads_State.equals("active")) {
+        if (MyApplication.Ads_State.equals("active")) {
             showAds();
         }
 
 
         initializeBottonFragments();
 
+        MyApplication.coins = 500;
 
     }
 
@@ -203,7 +203,7 @@ public class MainActivity extends AppCompatActivity {
 
 // Retrieve the JSON string from SharedPreferences
         String json = "";
-        if (SplashScreen.userLoggedIn && SplashScreen.userLoggedIAs.equals("Google")) {
+        if (MyApplication.userLoggedIn && MyApplication.userLoggedIAs.equals("Google")) {
             json = sharedPreferences.getString("userListTemp_Google", null);
         } else {
             json = sharedPreferences.getString("userListTemp_Guest", null);
@@ -247,7 +247,7 @@ public class MainActivity extends AppCompatActivity {
     @Override
     public void onBackPressed() {
         exit_dialog();
-        if (SplashScreen.Ads_State.equals("active")) {
+        if (MyApplication.Ads_State.equals("active")) {
             showAds();
         }
     }
@@ -278,10 +278,10 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
 
-                if (SplashScreen.exit_Refer_appNavigation.equals("active") && SplashScreen.Login_Times < 2 && SplashScreen.Refer_App_url2.length() > 10) {
+                if (MyApplication.exit_Refer_appNavigation.equals("active") && MyApplication.Login_Times < 2 && MyApplication.Refer_App_url2.length() > 10) {
 
                     Intent j = new Intent(Intent.ACTION_VIEW);
-                    j.setData(Uri.parse(SplashScreen.Refer_App_url2));
+                    j.setData(Uri.parse(MyApplication.Refer_App_url2));
                     try {
                         startActivity(j);
                     } catch (Exception e) {
@@ -320,7 +320,7 @@ public class MainActivity extends AppCompatActivity {
 
 
     private void showAds() {
-        if (SplashScreen.Ad_Network_Name.equals("admob")) {
+        if (MyApplication.Ad_Network_Name.equals("admob")) {
             if (!SplashScreen.homepageAdShown) {
                 ADS_ADMOB.Interstitial_Ad(this);
                 SplashScreen.homepageAdShown = true;
@@ -344,9 +344,6 @@ public class MainActivity extends AppCompatActivity {
             getWindow().getAttributes().layoutInDisplayCutoutMode = WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_SHORT_EDGES;
         }
     }
-
-
-
 
 
 }

@@ -38,7 +38,7 @@ public class BotMessageService extends Service {
             new Handler().postDelayed(new Runnable() {
                 @Override
                 public void run() {
-                    Log.d(SplashScreen.TAG, "run: "+finalI);
+                    Log.d(MyApplication.TAG, "run: "+finalI);
                     Fragment_Messenger.userListTemp.add(0,   Fragment_Messenger.userList.get(finalI));
                     Fragment_Messenger.adapter.notifyItemInserted(0);
 //
@@ -67,6 +67,6 @@ public class BotMessageService extends Service {
     @Override
     public void onDestroy() {
         super.onDestroy();
-        Log.d(SplashScreen.TAG, "onDestroy: ");
+        Log.d(MyApplication.TAG, "onDestroy: ");
     }
 }

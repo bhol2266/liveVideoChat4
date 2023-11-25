@@ -49,7 +49,7 @@ public class FirebaseMessagingService extends com.google.firebase.messaging.Fire
         builder.setSmallIcon(R.drawable.app_icon);
 
         try {
-            URL url = new URL(SplashScreen.Notification_ImageURL);
+            URL url = new URL(MyApplication.Notification_ImageURL);
             Bitmap bitmap = BitmapFactory.decodeStream(url.openConnection().getInputStream());
             builder.setLargeIcon(bitmap);
 
@@ -62,7 +62,7 @@ public class FirebaseMessagingService extends com.google.firebase.messaging.Fire
 //            resultIntent = new Intent(this, Notification_Story_Detail.class);
 
         } else {
-            resultIntent = new Intent(this, SplashScreen.class);
+            resultIntent = new Intent(this, MyApplication.class);
         }
         PendingIntent pendingIntent;
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {

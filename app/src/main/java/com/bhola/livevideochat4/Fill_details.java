@@ -164,7 +164,7 @@ public class Fill_details extends AppCompatActivity {
 
 
         UserModel userModel = new UserModel(nickName.getText().toString(), email, photoUrl, loggedAs, selectedGender, Birthday, "", "English", "", "", false, 0, userId, new java.util.Date(), "", new ArrayList<GalleryModel>(), "", false);
-        SplashScreen.userModel = userModel;
+        MyApplication.userModel = userModel;
 
 
         FirebaseFirestore db = FirebaseFirestore.getInstance();

@@ -175,7 +175,7 @@ public class LoginScreen extends AppCompatActivity {
                     }
                 });
             } catch (ApiException e) {
-                Log.d(SplashScreen.TAG, "onActivityResulttt: " + e.getMessage());
+                Log.d(MyApplication.TAG, "onActivityResulttt: " + e.getMessage());
             }
         }
         super.onActivityResult(requestCode, resultCode, data);
@@ -201,11 +201,14 @@ public class LoginScreen extends AppCompatActivity {
 
 
                         for (QueryDocumentSnapshot documentSnapshot : queryDocumentSnapshots) {
-                            SplashScreen.userModel = documentSnapshot.toObject(UserModel.class); // Replace User with your actual user model class
+                            MyApplication.userModel = documentSnapshot.toObject(UserModel.class); // Replace User with your actual user model class
                             Utils utils = new Utils();
                             utils.updateDateonFireStore("date", new Date());
 
                             // Use the user data as needed
+                            MyApplication.userLoggedIn = true;
+                            MyApplication.userLoggedIAs = MyApplication.userModel.getLoggedAs();
+
                             Toast.makeText(this, "Welcome Back!", Toast.LENGTH_SHORT).show();
 
                             SharedPreferences sharedPreferences = getSharedPreferences("UserInfo", MODE_PRIVATE);
@@ -213,24 +216,24 @@ public class LoginScreen extends AppCompatActivity {
 
 
                             editor.putString("email", email);
-                            editor.putString("photoUrl", SplashScreen.userModel.getProfilepic());
-                            editor.putString("loginAs", SplashScreen.userModel.getLoggedAs());
-                            editor.putString("Bio", SplashScreen.userModel.getLoggedAs());
-                            editor.putString("Language", SplashScreen.userModel.getLanguage());
+                            editor.putString("photoUrl", MyApplication.userModel.getProfilepic());
+                            editor.putString("loginAs", MyApplication.userModel.getLoggedAs());
+                            editor.putString("Bio", MyApplication.userModel.getBio());
+                            editor.putString("Language", MyApplication.userModel.getLanguage());
 
-                            editor.putString("nickName", SplashScreen.userModel.getFullname());
-                            editor.putString("Gender", SplashScreen.userModel.getSelectedGender());
-                            editor.putString("Birthday", SplashScreen.userModel.getBirthday());
-                            editor.putInt("userId", SplashScreen.userModel.getUserId());
-                            editor.putInt("coins", SplashScreen.userModel.getCoins());
+                            editor.putString("nickName", MyApplication.userModel.getFullname());
+                            editor.putString("Gender", MyApplication.userModel.getSelectedGender());
+                            editor.putString("Birthday", MyApplication.userModel.getBirthday());
+                            editor.putInt("userId", MyApplication.userModel.getUserId());
+                            editor.putInt("coins", MyApplication.userModel.getCoins());
                             editor.apply();
 
                             Utils.replaceFCMToken();
 
 
                             dismissLoadingDialog();
-                            if (SplashScreen.userModel.getGalleryImages().size() > 1) {
-                                saveGalleryImages(SplashScreen.userModel.getGalleryImages()); // save gallery images to local storeage from firebase storage
+                            if (MyApplication.userModel.getGalleryImages().size() > 1) {
+                                saveGalleryImages(MyApplication.userModel.getGalleryImages()); // save gallery images to local storeage from firebase storage
                             } else {
                                 startActivity(new Intent(LoginScreen.this, MainActivity.class));
                             }
@@ -260,7 +263,7 @@ public class LoginScreen extends AppCompatActivity {
         SharedPreferences.Editor editor = sharedPreferences.edit();
 
         List<GalleryModel> itemList = new ArrayList<>();
-        itemList.addAll(SplashScreen.userModel.getGalleryImages());
+        itemList.addAll(MyApplication.userModel.getGalleryImages());
 
         Gson gson = new Gson();
         String json = gson.toJson(itemList);
@@ -286,8 +289,10 @@ public class LoginScreen extends AppCompatActivity {
 
 
     private void LoginInComplete(String loggedAs, String displayName, String email, String photoUrl) {
-        SplashScreen.userLoggedIn = true;
-        SplashScreen.userLoggedIAs = loggedAs;
+        //new login
+        MyApplication.userLoggedIn = true;
+        Log.d("dasfsadf", "LoginInComplete: "+loggedAs);
+        MyApplication.userLoggedIAs = loggedAs;
         finish();
         Intent intent = new Intent(LoginScreen.this, Fill_details.class);
         intent.putExtra("loggedAs", loggedAs);
@@ -333,7 +338,7 @@ class DownloadImageTask extends AsyncTask<ArrayList<GalleryModel>, Void, Void> {
                 }
                 File file = new File(internalStorage, galleryModel.getImageFileNAme());
                 Uri imageURI = Uri.fromFile(file);
-                SplashScreen.userModel.getGalleryImages().get(i).setImage_uri(String.valueOf(imageURI));
+                MyApplication.userModel.getGalleryImages().get(i).setImage_uri(String.valueOf(imageURI));
 
                 if (file.exists()) file.delete();
 

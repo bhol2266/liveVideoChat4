@@ -29,12 +29,12 @@ import androidx.cardview.widget.CardView;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.airbnb.lottie.LottieAnimationView;
-import com.bhola.livevideochat4.Models.ChatItem_ModelClass;
 import com.bhola.livevideochat4.ChatScreen_User;
 import com.bhola.livevideochat4.Fragment_LargePhotoViewer;
+import com.bhola.livevideochat4.Models.ChatItem_ModelClass;
 import com.bhola.livevideochat4.Models.Chats_Modelclass;
+import com.bhola.livevideochat4.MyApplication;
 import com.bhola.livevideochat4.R;
-import com.bhola.livevideochat4.SplashScreen;
 import com.squareup.picasso.Picasso;
 
 import java.io.IOException;
@@ -343,7 +343,7 @@ public class ChatsAdapter extends RecyclerView.Adapter {
             senderVierwHolder.timeStamp.setText(formattedDate);
 
 
-            if (SplashScreen.userLoggedIAs.equals("Google")) {
+            if (MyApplication.userLoggedIAs.equals("Google")) {
                 SharedPreferences sh = context.getSharedPreferences("UserInfo", MODE_PRIVATE);
                 String urll = sh.getString("photoUrl", "not set");
                 Picasso.get().load(urll).into(senderVierwHolder.profile);
@@ -378,7 +378,7 @@ public class ChatsAdapter extends RecyclerView.Adapter {
     }
 
     private void updateErrorIcon(FrameLayout errorLayout, ImageView errorIcon, String chatType) {
-        if (!chatType.equals("premium") || SplashScreen.coins > 0) {
+        if (!chatType.equals("premium") || MyApplication.coins > 0) {
             errorLayout.setVisibility(View.GONE);
         }
         new Handler().postDelayed(new Runnable() {
