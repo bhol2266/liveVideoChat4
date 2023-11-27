@@ -1,5 +1,7 @@
 package com.bhola.livevideochat4;
 
+import android.content.ClipData;
+import android.content.ClipboardManager;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Color;
@@ -14,6 +16,7 @@ import android.view.WindowManager;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
@@ -95,6 +98,20 @@ public class Profile2 extends AppCompatActivity {
 
 
         TextView profileName = findViewById(R.id.profileName);
+        TextView bioTextview = findViewById(R.id.bioTextview);
+
+        bioTextview.setText(model_profile.getEmail());
+        bioTextview.setOnClickListener(view->{
+            ClipboardManager clipboardManager = (ClipboardManager) getSystemService(Context.CLIPBOARD_SERVICE);
+
+            // Create a ClipData object to hold the text
+            ClipData clipData = ClipData.newPlainText("label", model_profile.getEmail());
+
+            // Set the ClipData on the clipboard
+            clipboardManager.setPrimaryClip(clipData);
+            Toast.makeText(this, "Copied", Toast.LENGTH_SHORT).show();
+
+        });
         profileName.setText(model_profile.getFullname());
 
         TextView age = findViewById(R.id.age);

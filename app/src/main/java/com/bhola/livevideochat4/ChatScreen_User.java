@@ -127,6 +127,13 @@ public class ChatScreen_User extends Activity {
     }
 
     private void getModalClass() {
+        try {
+            //this is check if Fragment_Messenger.adapter.userList is not empty, if empty goback
+            int sizee = Fragment_Messenger.adapter.userList.size();
+        } catch (Exception e) {
+            onBackPressed();
+            return;
+        }
 
         SharedPreferences sharedPreferences = getSharedPreferences("UserInfo", MODE_PRIVATE);
         String userName = sharedPreferences.getString("userName", "");
@@ -539,19 +546,17 @@ public class ChatScreen_User extends Activity {
     private void smartReply(String msg) {
 
 
-        try {
-            Random random = new Random();
-            int randomNumber = random.nextInt(10 - 5) + 5;
-            conversation.clear();
-            conversation.add(FirebaseTextMessage.createForRemoteUser(
-                    msg, System.currentTimeMillis(), "sadfsadf"));
-            if (conversation.isEmpty()) {
-                return;
-            }
-            new Handler().postDelayed(new Runnable() {
-                @Override
-                public void run() {
-                    FirebaseSmartReply smartReply = FirebaseNaturalLanguage.getInstance().getSmartReply();
+        Random random = new Random();
+        int randomNumber = random.nextInt(10 - 5) + 5;
+        conversation.clear();
+        conversation.add(FirebaseTextMessage.createForRemoteUser(
+                msg, System.currentTimeMillis(), "sadfsadf"));
+
+        new Handler().postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                FirebaseSmartReply smartReply = FirebaseNaturalLanguage.getInstance().getSmartReply();
+                try {
                     smartReply.suggestReplies(conversation)
                             .addOnSuccessListener(new OnSuccessListener<SmartReplySuggestionResult>() {
                                 @Override
@@ -583,11 +588,14 @@ public class ChatScreen_User extends Activity {
                             });
 
 
+                } catch (Exception e) {
+                    Log.d("Exceptiondd", "run: " + e.getMessage());
                 }
-            }, randomNumber * 1000);
 
-        } catch (Exception e) {
-        }
+
+            }
+        }, randomNumber * 1000);
+
 
     }
 
@@ -603,18 +611,19 @@ public class ChatScreen_User extends Activity {
         recordButton.setRecordView(recordView);
 //        recordView.setRecordButtonGrowingAnimationEnabled(false);
 
-
         recordView.setOnRecordListener(new OnRecordListener() {
             @Override
             public void onStart() {
                 //Start Recording..
                 ChangeVisiblityMic(true);
                 recordFile = new File(getFilesDir(), UUID.randomUUID().toString() + ".3gp");
-                try {
-                    audioRecorder.start(recordFile.getPath());
-                } catch (IOException e) {
-                    e.printStackTrace();
+                if (recordFile.canWrite()) {
+                    try {
+                        audioRecorder.start(recordFile.getPath());
+                    } catch (IOException e) {
+                    }
                 }
+
             }
 
             @Override

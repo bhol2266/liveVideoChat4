@@ -53,6 +53,13 @@ public class MainActivity extends AppCompatActivity {
 
 //        fullscreenMode();
         checkForupdate();
+        try {
+            // this is check if user data is available or not , if not start splashscreen
+            String userId = String.valueOf(MyApplication.userModel.getUserId());
+        } catch (Exception e) {
+            startActivity(new Intent(MainActivity.this, SplashScreen.class));
+            return;
+        }
 
 
         if (MyApplication.Ads_State.equals("active")) {
@@ -61,8 +68,6 @@ public class MainActivity extends AppCompatActivity {
 
 
         initializeBottonFragments();
-
-        MyApplication.coins = 500;
 
     }
 
