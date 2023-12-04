@@ -456,9 +456,14 @@ public class Fragment_Messenger extends Fragment {
             }
         }
 
-        MainActivity.badge_text.setText(String.valueOf(count));
-        MainActivity.badge_text.setVisibility(View.VISIBLE);
-        MainActivity.badge_text.setBackgroundResource(R.drawable.badge_background);
+        try {
+            //crashlytics crash
+            MainActivity.badge_text.setText(String.valueOf(count));
+            MainActivity.badge_text.setVisibility(View.VISIBLE);
+            MainActivity.badge_text.setBackgroundResource(R.drawable.badge_background);
+        } catch (Exception e) {
+        }
+
         MainActivity.unreadMessage_count = count;
 
         if (count == 0) {

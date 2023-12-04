@@ -188,7 +188,6 @@ public class ChatsAdapter extends RecyclerView.Adapter {
                         int screenHeight = displayMetrics.heightPixels;
 
 
-                        Log.d("SDfsd", "onClick: " + imageList.size());
                         // Decrease the screen width by 15%
                         int screenWidth = (int) (originalScreenWidth * 0.85);
                         Fragment_LargePhotoViewer fragment = Fragment_LargePhotoViewer.newInstance(context, (ArrayList<Map<String, String>>) imageList, index, screenWidth, screenHeight);

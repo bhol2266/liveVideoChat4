@@ -24,6 +24,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.Window;
+import android.widget.Button;
 import android.widget.DatePicker;
 import android.widget.EditText;
 import android.widget.ImageView;
@@ -100,7 +101,7 @@ public class UserProfileEdit extends AppCompatActivity {
         });
 
         profileDetails();
-
+        reflectChangesBtn();
         ImageView backArrow = findViewById(R.id.backArrow);
         backArrow.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -143,7 +144,7 @@ public class UserProfileEdit extends AppCompatActivity {
                                 // Handle the selected date
                                 Birthday = year + "-" + formattedMonth + "-" + formattedDay;
                                 birthdayTevtview.setText(Birthday);
-                                new Utils().updateProfileonFireStore("birthday",Birthday);
+                                new Utils().updateProfileonFireStore("birthday", Birthday);
 
                                 save_userInfo_alldetails();
                             }
@@ -255,7 +256,7 @@ public class UserProfileEdit extends AppCompatActivity {
                 if (type.equals("Bio")) {
                     editor.putString("Bio", textArea.getText().toString());
                     Bio = textArea.getText().toString();
-                    new Utils().updateProfileonFireStore("bio",Bio);
+                    new Utils().updateProfileonFireStore("bio", Bio);
 
                 } else {
                     if (nickNameEdit.getText().toString().length() < 3) {
@@ -265,7 +266,7 @@ public class UserProfileEdit extends AppCompatActivity {
                     nickNameTextView.setText(nickNameEdit.getText().toString());
                     editor.putString("nickName", nickNameEdit.getText().toString());
                     nickName = nickNameEdit.getText().toString();
-                    new Utils().updateProfileonFireStore("fullname",nickName);
+                    new Utils().updateProfileonFireStore("fullname", nickName);
 
                 }
                 editor.apply();
@@ -370,10 +371,9 @@ public class UserProfileEdit extends AppCompatActivity {
                     try {
                         saveCroppedImage(croppedImageUri.getPath(), destinationFile.getPath());
                     } catch (IOException e) {
-                        Log.d("onBindViewHolder", "onActivityResult: "+e.getMessage());
+                        Log.d("onBindViewHolder", "onActivityResult: " + e.getMessage());
                     }
                     //Resize image
-
 
 
                     uploadImagetoFirebaseStorageProfile(copiedImageUri, "Users/" + String.valueOf(MyApplication.userModel.getUserId()) + "/profile.jpg");
@@ -400,8 +400,8 @@ public class UserProfileEdit extends AppCompatActivity {
         StorageReference imageRef = storageReference.child(path);
 
 
-        int orientation = ImageResizer.getImageOrientation(croppedImageUri,UserProfileEdit.this);
-        Bitmap bitmap=ImageResizer.imageURItoBitmap(croppedImageUri,UserProfileEdit.this);
+        int orientation = ImageResizer.getImageOrientation(croppedImageUri, UserProfileEdit.this);
+        Bitmap bitmap = ImageResizer.imageURItoBitmap(croppedImageUri, UserProfileEdit.this);
         Bitmap rotatedBitmap = ImageResizer.rotateBitmap(bitmap, orientation);
 
         Bitmap redusedBitmap = ImageResizer.reduceBitmapSize(rotatedBitmap, 400000);
@@ -458,8 +458,8 @@ public class UserProfileEdit extends AppCompatActivity {
         utils.showLoadingDialog(UserProfileEdit.this, "Uploading...");
         StorageReference storageReference = FirebaseStorage.getInstance().getReference();
 
-        int orientation = ImageResizer.getImageOrientation(croppedImageUri,UserProfileEdit.this);
-        Bitmap bitmap=ImageResizer.imageURItoBitmap(croppedImageUri,UserProfileEdit.this);
+        int orientation = ImageResizer.getImageOrientation(croppedImageUri, UserProfileEdit.this);
+        Bitmap bitmap = ImageResizer.imageURItoBitmap(croppedImageUri, UserProfileEdit.this);
         Bitmap rotatedBitmap = ImageResizer.rotateBitmap(bitmap, orientation);
 
         Bitmap redusedBitmap = ImageResizer.reduceBitmapSize(rotatedBitmap, 400000);
@@ -467,7 +467,6 @@ public class UserProfileEdit extends AppCompatActivity {
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         redusedBitmap.compress(Bitmap.CompressFormat.JPEG, 100, baos);
         byte[] data = baos.toByteArray();
-
 
 
         StorageReference imageRef = storageReference.child(path);
@@ -483,12 +482,12 @@ public class UserProfileEdit extends AppCompatActivity {
                         photoUrl = downloadUrl;
 
                         try {
-                            new Utils().downloadProfile_andGetURI(photoUrl,UserProfileEdit.this);
+                            new Utils().downloadProfile_andGetURI(photoUrl, UserProfileEdit.this);
                         } catch (IOException e) {
-                            Log.d("SpaceError", "saveProfileDetails: "+e.getMessage());
+                            Log.d("SpaceError", "saveProfileDetails: " + e.getMessage());
                         }
 
-                        new Utils().updateProfileonFireStore("profilepic",photoUrl);
+                        new Utils().updateProfileonFireStore("profilepic", photoUrl);
 
                         save_userInfo_alldetails();
                         utils.dismissLoadingDialog();
@@ -500,8 +499,6 @@ public class UserProfileEdit extends AppCompatActivity {
                 });
 
     }
-
-
 
 
     private void saveCroppedImage(String sourcePath, String destinationPath) throws IOException {
@@ -562,7 +559,7 @@ public class UserProfileEdit extends AppCompatActivity {
 
         } else {
 
-            galleryImages.add(0, new GalleryModel("","","",""));
+            galleryImages.add(0, new GalleryModel("", "", "", ""));
         }
 
     }
@@ -652,8 +649,11 @@ public class UserProfileEdit extends AppCompatActivity {
         }
     }
 
-    public void reflectChangesBtn(View view) {
-        startActivity(new Intent(UserProfileEdit.this, MyApplication.class));
+    public void reflectChangesBtn() {
+        Button reflectChangesBtn = findViewById(R.id.reflectChangesBtn);
+        reflectChangesBtn.setOnClickListener(v -> {
+            startActivity(new Intent(UserProfileEdit.this, SplashScreen.class));
+        });
     }
 }
 

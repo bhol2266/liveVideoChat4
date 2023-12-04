@@ -392,7 +392,14 @@ public class CameraActivity extends AppCompatActivity {
 
             }
         });
-        String videoPath = MyApplication.databaseURL_video + "InternationalChatVideos/" + girlsList.get(currentVideoIndex).getUsername() + ".mp4";
+        String videoPath;
+        try {
+            //crashlytics crash
+            videoPath = MyApplication.databaseURL_video + "InternationalChatVideos/" + girlsList.get(currentVideoIndex).getUsername() + ".mp4";
+        } catch (Exception e) {
+            currentVideoIndex = 0;
+            videoPath = MyApplication.databaseURL_video + "InternationalChatVideos/" + girlsList.get(currentVideoIndex).getUsername() + ".mp4";
+        }
 
 
         getGirlProfile_DB(girlsList.get(currentVideoIndex).getUsername()); //this method is for reading single girl data from db top update name and use data for intent when user wants to goto profile

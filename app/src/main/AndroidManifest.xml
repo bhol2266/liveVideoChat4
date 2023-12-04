@@ -4,7 +4,7 @@
 
     <uses-permission android:name="android.permission.RECORD_AUDIO" />
     <uses-permission android:name="android.permission.MODIFY_AUDIO_SETTINGS" />
-    <uses-permission android:name="android.permission.READ_PHONE_STATE"/>
+    <uses-permission android:name="android.permission.READ_PHONE_STATE" />
     <uses-permission android:name="android.permission.BLUETOOTH" />
 
     <!-- Add alert window -->
@@ -61,6 +61,7 @@
         <activity
             android:name=".UserProfileEdit"
             android:exported="false" />
+
         <activity
             android:name=".About"
             android:exported="false" />

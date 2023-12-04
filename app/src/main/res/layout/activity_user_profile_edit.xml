@@ -375,7 +375,6 @@
             android:paddingLeft="15dp"
             android:paddingTop="10dp"
             android:paddingRight="15dp"
-            android:onClick="reflectChangesBtn"
             android:paddingBottom="10dp"
             android:layout_gravity="center_horizontal"
             android:text="Restart to reflect changes"

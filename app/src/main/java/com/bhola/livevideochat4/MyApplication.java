@@ -81,7 +81,7 @@ public class MyApplication extends Application {
 //                startTransferProcess();
 
             }
-        }, 100);
+        }, 5000);
 
 
 
@@ -213,13 +213,7 @@ public class MyApplication extends Application {
 
 
         String[] countries = {
-                "African", "American", "Arab", "Argentinian", "Australian", "Belgian", "Brazilian", "Bulgarian",
-                "Canadian", "Chilean", "Chinese", "Colombian", "Croatian", "Czech", "Danish", "Dutch", "Ecuadorian",
-                "Estonian", "Finnish", "French", "German", "Greek", "Hungarian", "Indian", "Irish", "Israeli", "Italian",
-                "Japanese", "Kenyan", "Korean", "Lithuanian", "Malagasy", "Mexican", "Nigerian", "Nordic", "Norwegian",
-                "Peruvian", "Polish", "Portuguese", "Romanian", "Russian", "Serbian", "Slovakian", "South African",
-                "Spanish", "SriLankan", "Swedish", "Swiss", "Thai", "Turkish", "UK", "Ugandan", "Ukrainian", "Uruguayan",
-                "Venezuelan", "Vietnamese", "Zimbabwean"
+                "Indian"
         };
 
         for (String country : countries) {
