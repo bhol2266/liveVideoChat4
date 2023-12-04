@@ -30,7 +30,6 @@ import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.appcompat.widget.AppCompatTextView;
 import androidx.cardview.widget.CardView;
 import androidx.core.content.ContextCompat;
 import androidx.recyclerview.widget.GridLayoutManager;
@@ -46,11 +45,9 @@ import com.android.billingclient.api.ConsumeResponseListener;
 import com.android.billingclient.api.ProductDetails;
 import com.android.billingclient.api.ProductDetailsResponseListener;
 import com.android.billingclient.api.Purchase;
-import com.android.billingclient.api.PurchasesResponseListener;
 import com.android.billingclient.api.QueryProductDetailsParams;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
-import com.google.android.material.snackbar.Snackbar;
 import com.google.common.collect.ImmutableList;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
@@ -101,37 +98,35 @@ public class VipMembership extends AppCompatActivity {
         billingClient = BillingClient.newBuilder(this).enablePendingPurchases().setListener((billingResult, list) -> {
 
             if (billingResult.getResponseCode() == BillingClient.BillingResponseCode.OK && list != null) {
+                boolean purchaseDone = false;
                 for (Purchase purchase : list) {
+                    consumePurchase(purchase);
+                    if (purchase.getPurchaseState() == Purchase.PurchaseState.PURCHASED && !purchase.isAcknowledged()) {
+                        //first this is triggerd than onResume is called
+                        verifyPurchase(purchase);
+                        purchaseDone = true;
+                        new Handler().postDelayed(new Runnable() {
+                            @Override
+                            public void run() {
+                                progressBar.setVisibility(View.GONE);
+                                cancelScheduledAlarm();
+                                startActivity(new Intent(VipMembership.this, SplashScreen.class));
+                            }
+                        }, 5000);
 
-                    //first this is triggerd than onResume is called
+                    }
 
-                    verifyPurchase(purchase);
-
+                }
+                if (!purchaseDone) {
                     new Handler().postDelayed(new Runnable() {
                         @Override
                         public void run() {
-                            Snackbar snackbar = Snackbar.make(findViewById(android.R.id.content), "Payment failed. If your money is deducted, it will be reflected back to your Bank Account soon", Snackbar.LENGTH_INDEFINITE);
-                            snackbar.setAction("Dismiss", new View.OnClickListener() {
-                                @Override
-                                public void onClick(View v) {
-                                    snackbar.dismiss();
-                                }
-                            });
-
-                            View snackbarView = snackbar.getView();
-                            AppCompatTextView textView = snackbarView.findViewById(com.google.android.material.R.id.snackbar_text);
-                            textView.setMaxLines(5); // Adjust this value as needed
-
-//                            snackbar.show();
                             progressBar.setVisibility(View.GONE);
-
                             cancelScheduledAlarm();
-                            startActivity(new Intent(VipMembership.this, MyApplication.class));
+                            Toast.makeText(VipMembership.this, "Payment failed! try again", Toast.LENGTH_SHORT).show();
 
                         }
                     }, 5000);
-
-
                 }
             } else {
                 // Handle any other error codes.
@@ -432,20 +427,7 @@ public class VipMembership extends AppCompatActivity {
             coins = Integer.parseInt(number);
         }
 
-
         savePurchaseDetails_inSharedPreference(purchase.getPurchaseToken(), coins, purchase.getPurchaseTime());
-
-        ConsumeParams consumeParams = ConsumeParams.newBuilder().setPurchaseToken(purchase.getPurchaseToken()).build();
-        billingClient.consumeAsync(consumeParams, new ConsumeResponseListener() {
-            @Override
-            public void onConsumeResponse(@NonNull BillingResult billingResult, @NonNull String s) {
-                if (billingResult.getResponseCode() == BillingClient.BillingResponseCode.OK) {
-                    Log.d(MyApplication.TAG, "Consumed: ");
-                }
-            }
-        });
-
-
         FirebaseFirestore db = FirebaseFirestore.getInstance();
         DocumentReference documentRef = db.collection("purchases").document(purchase.getPurchaseToken());
 
@@ -517,32 +499,6 @@ public class VipMembership extends AppCompatActivity {
         myEdit.commit();
         FirebaseUtil.addUserCoins(coins);
 
-    }
-
-    @Override
-    protected void onResume() {
-        super.onResume();
-        billingClient.queryPurchasesAsync(BillingClient.ProductType.INAPP, new PurchasesResponseListener() {
-            @Override
-            public void onQueryPurchasesResponse(@NonNull BillingResult billingResult, @NonNull List<Purchase> list) {
-                if (billingResult.getResponseCode() == BillingClient.BillingResponseCode.OK) {
-                    for (Purchase purchase : list) {
-                        if (purchase.getPurchaseState() == Purchase.PurchaseState.PURCHASED && !purchase.isAcknowledged()) {
-                            verifyPurchase(purchase);
-
-                            new Handler().postDelayed(new Runnable() {
-                                @Override
-                                public void run() {
-                                    progressBar.setVisibility(View.GONE);
-
-                                }
-                            }, 5000);
-
-                        }
-                    }
-                }
-            }
-        });
     }
 
 
@@ -754,6 +710,21 @@ public class VipMembership extends AppCompatActivity {
         });
     }
 
+
+    private void consumePurchase(Purchase purchase) {
+        ConsumeParams consumeParams = ConsumeParams.newBuilder().setPurchaseToken(purchase.getPurchaseToken()).build();
+        billingClient.consumeAsync(consumeParams, new ConsumeResponseListener() {
+            @Override
+            public void onConsumeResponse(@NonNull BillingResult billingResult, @NonNull String s) {
+
+                if (billingResult.getResponseCode() == BillingClient.BillingResponseCode.OK) {
+                    Log.d("asdfsdaf", "Consumed: "+purchase.getPurchaseToken());
+                }
+            }
+        });
+
+
+    }
 
     @Override
     public void onBackPressed() {

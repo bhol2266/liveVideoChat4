@@ -96,7 +96,7 @@ public class Fragment_Calling extends Fragment {
             public void run() {
                 endcall.performClick();
             }
-        }, 10000);
+        }, 15000);
     }
 
     private void init() {
@@ -131,6 +131,8 @@ public class Fragment_Calling extends Fragment {
 
         VideoView videoView = view.findViewById(R.id.videoView);
         String videoPath = MyApplication.databaseURL_video + "InternationalChatVideos/" + username + ".mp4";
+        Log.d("sadfsd", "videoPath: "+videoPath);
+
         Log.d(MyApplication.TAG, "init: "+videoPath);
         Uri videoUri = Uri.parse(videoPath);
         videoView.setVideoURI(videoUri);

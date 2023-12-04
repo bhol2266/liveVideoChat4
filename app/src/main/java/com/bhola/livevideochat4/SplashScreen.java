@@ -6,7 +6,7 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Build;
 import android.os.Bundle;
-import android.os.Handler;
+import android.util.Log;
 import android.view.View;
 import android.view.WindowManager;
 import android.view.animation.Animation;
@@ -75,10 +75,6 @@ public class SplashScreen extends AppCompatActivity {
             public void onAnimationEnd(Animator animation) {
                 animationCompleted = true;
 
-                if (!activityChanged) {
-//                    handler_forIntent();
-                }
-
 
             }
 
@@ -115,49 +111,33 @@ public class SplashScreen extends AppCompatActivity {
 
 
     private void allUrl() {
-        if (!Utils.isInternetAvailable(SplashScreen.this)) {
+        if (Utils.isInternetAvailable(SplashScreen.this)) {
+            {
+                url_mref = FirebaseDatabase.getInstance().getReference().child("LiveVideoChat4");
+                url_mref.addListenerForSingleValueEvent(new ValueEventListener() {
+                    @Override
+                    public void onDataChange(@NonNull DataSnapshot snapshot) {
+                        MyApplication.Refer_App_url2 = (String) snapshot.child("Refer_App_url2").getValue();
+                        MyApplication.exit_Refer_appNavigation = (String) snapshot.child("switch_Exit_Nav").getValue();
+                        MyApplication.Ads_State = (String) snapshot.child("Ads").getValue();
+                        MyApplication.Ad_Network_Name = (String) snapshot.child("Ad_Network").getValue();
+                        MyApplication.App_updating = (String) snapshot.child("App_updating").getValue();
+                        MyApplication.Notification_ImageURL = (String) snapshot.child("Notification_ImageURL").getValue();
+                        MyApplication.databaseURL_video = (String) snapshot.child("databaseURL_video").getValue();
+                        MyApplication.databaseURL_images = (String) snapshot.child("databaseURL_images").getValue();
 
-            Handler handler2 = new Handler();
-            handler2.postDelayed(new Runnable() {
-                @Override
-                public void run() {
-                    if (MyApplication.Login_Times > 5) {
-                        MyApplication.App_updating = "inactive";
-                        MyApplication.Ads_State = "active";
-                        MyApplication.Ad_Network_Name = "admob";
+
+                        sharedPrefrences();
+
+
                     }
-                    if (!activityChanged) {
-                        handler_forIntent();
+
+                    @Override
+                    public void onCancelled(@NonNull DatabaseError error) {
+                        Toast.makeText(SplashScreen.this, error.getMessage(), Toast.LENGTH_SHORT).show();
                     }
-                }
-            }, 2000);
-
-            return;
-        } else {
-            url_mref = FirebaseDatabase.getInstance().getReference().child("LiveVideoChat4");
-            url_mref.addListenerForSingleValueEvent(new ValueEventListener() {
-                @Override
-                public void onDataChange(@NonNull DataSnapshot snapshot) {
-                    MyApplication.Refer_App_url2 = (String) snapshot.child("Refer_App_url2").getValue();
-                    MyApplication.exit_Refer_appNavigation = (String) snapshot.child("switch_Exit_Nav").getValue();
-                    MyApplication.Ads_State = (String) snapshot.child("Ads").getValue();
-                    MyApplication.Ad_Network_Name = (String) snapshot.child("Ad_Network").getValue();
-                    MyApplication.App_updating = (String) snapshot.child("App_updating").getValue();
-                    MyApplication.Notification_ImageURL = (String) snapshot.child("Notification_ImageURL").getValue();
-                    MyApplication.databaseURL_video = (String) snapshot.child("databaseURL_video").getValue();
-                    MyApplication.databaseURL_images = (String) snapshot.child("databaseURL_images").getValue();
-
-
-                    sharedPrefrences();
-
-
-                }
-
-                @Override
-                public void onCancelled(@NonNull DatabaseError error) {
-                    Toast.makeText(SplashScreen.this, error.getMessage(), Toast.LENGTH_SHORT).show();
-                }
-            });
+                });
+            }
         }
 
 
@@ -208,20 +188,43 @@ public class SplashScreen extends AppCompatActivity {
                         //update user latest login date
                         Utils utils = new Utils();
                         utils.updateDateonFireStore("date", new Date());
-                        if (animationCompleted) {
-                            handler_forIntent();
-                        }
                     } else {
 
                         MyApplication.userLoggedIn = false;
-                        if (animationCompleted) {
-                            handler_forIntent();
-                        }
                         // User document doesn't exist
+                    }
+
+                    if (animationCompleted) {
+                        handler_forIntent();
+                    } else {
+                        lottie_progressbar.addAnimatorListener(new Animator.AnimatorListener() {
+                            @Override
+                            public void onAnimationStart(Animator animation) {
+
+                            }
+
+                            @Override
+                            public void onAnimationEnd(Animator animation) {
+                                handler_forIntent();
+
+                            }
+
+                            @Override
+                            public void onAnimationCancel(Animator animation) {
+
+                            }
+
+                            @Override
+                            public void onAnimationRepeat(Animator animation) {
+
+                            }
+                        });
                     }
                 })
                 .addOnFailureListener(e -> {
                     // Handle the error
+                    Log.d("sadfsadf", "e: " + e.getMessage());
+
                 });
 
 

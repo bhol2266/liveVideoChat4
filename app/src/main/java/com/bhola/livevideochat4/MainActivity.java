@@ -10,6 +10,7 @@ import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.WindowManager;
@@ -23,9 +24,12 @@ import androidx.core.content.ContextCompat;
 import androidx.core.view.WindowCompat;
 import androidx.core.view.WindowInsetsCompat;
 import androidx.core.view.WindowInsetsControllerCompat;
+import androidx.fragment.app.FragmentManager;
+import androidx.fragment.app.FragmentTransaction;
 import androidx.viewpager2.widget.ViewPager2;
 
 import com.bhola.livevideochat4.Models.ChatItem_ModelClass;
+import com.bhola.livevideochat4.Models.Model_Profile;
 import com.bhola.livevideochat4.Models.UserBotMsg;
 import com.google.android.material.tabs.TabLayout;
 import com.google.android.material.tabs.TabLayoutMediator;
@@ -68,6 +72,65 @@ public class MainActivity extends AppCompatActivity {
 
 
         initializeBottonFragments();
+        startIncomingCallService();
+
+
+    }
+
+    private void startIncomingCallService() {
+        if (MyApplication.App_updating.equals("active")) {
+            return;
+        }
+//        Intent intent = new Intent(MainActivity.this, IncomingCallService.class);
+//        startService(intent);
+
+
+        new Handler().postDelayed(new Runnable() {
+            @Override
+            public void run() {
+
+                showFragment();
+            }
+        }, 20000);
+
+        new Handler().postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                showFragment();
+            }
+        }, 90000);
+
+        new Handler().postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                showFragment();
+            }
+        }, 210000);
+
+    }
+
+    private void showFragment() {
+        FragmentManager fragmentManager = getSupportFragmentManager();
+
+        if (!fragmentManager.isDestroyed()) {
+            try {
+                FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
+                Fragment_Calling fragment = new Fragment_Calling();
+
+                Model_Profile randomgirl = Utils.getSingleRandomGirlVideoObject(MainActivity.this);
+
+                Bundle args = new Bundle();
+                args.putString("name", randomgirl.getUsername());
+                args.putString("profile", randomgirl.getProfilePhoto());
+                args.putString("username", randomgirl.getUsername());
+                fragment.setArguments(args);
+                fragmentTransaction.replace(R.id.fragment_container, fragment);
+                fragmentTransaction.commit();
+            } catch (Exception e) {
+
+            }
+        }
+
 
     }
 

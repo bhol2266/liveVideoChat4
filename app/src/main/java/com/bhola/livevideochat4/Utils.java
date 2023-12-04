@@ -29,19 +29,23 @@ import com.google.gson.Gson;
 
 import org.json.JSONArray;
 import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
+import java.nio.charset.StandardCharsets;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Random;
 
 import javax.net.ssl.HttpsURLConnection;
 
@@ -103,9 +107,9 @@ public class Utils {
 
     public static void replaceFCMToken() {
         FirebaseMessaging.getInstance().getToken().addOnCompleteListener(task -> {
-            if(task.isSuccessful()){
+            if (task.isSuccessful()) {
                 String token = task.getResult();
-                new Utils().updateProfileonFireStore("fcmToken",token);
+                new Utils().updateProfileonFireStore("fcmToken", token);
             }
         });
     }
@@ -188,7 +192,7 @@ public class Utils {
         return 0;
     }
 
-    public Bitmap applyBlur(Bitmap inputBitmap, int radius,Context context) {
+    public Bitmap applyBlur(Bitmap inputBitmap, int radius, Context context) {
         Bitmap outputBitmap = Bitmap.createBitmap(inputBitmap);
 
         RenderScript renderScript = RenderScript.create(context);
@@ -206,7 +210,7 @@ public class Utils {
         return outputBitmap;
     }
 
-    public static  boolean isInternetAvailable(Context context) {
+    public static boolean isInternetAvailable(Context context) {
         if (context == null) return false;
 
 
@@ -344,5 +348,84 @@ public class Utils {
 
         return model_profile;
     }
+
+
+    public static Model_Profile getSingleRandomGirlVideoObject(Context context) {
+
+        ArrayList<Girl> girlsList = new ArrayList<>();
+//         Read and parse the JSON file
+        try {
+            JSONArray girlsArray = new JSONArray(loadJSONFromAsset(context));
+
+            // Iterate through the girls array
+            for (int i = 0; i < girlsArray.length(); i++) {
+                JSONObject girlObject = girlsArray.getJSONObject(i);
+
+
+                Girl girl = new Girl();
+                String censorship = girlObject.getString("censorship");
+                if (censorship.equals("uncensored")) {
+                    girl.setCensored(false);
+                } else {
+                    girl.setCensored(true);
+                }
+                girl.setUsername(girlObject.getString("username"));
+
+                girl.setSeen(false);
+                girl.setLiked(false);
+
+                // Add the Girl object to the ArrayList
+                if (MyApplication.userLoggedIAs.equals("Google")) {
+                    girlsList.add(girl);
+                } else {
+                    if (girl.isCensored()) {
+                        girlsList.add(girl);
+                    }
+                }
+
+            }
+            Collections.shuffle(girlsList);
+
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+
+        Random random = new Random();
+        int randomIndex = random.nextInt(girlsList.size());
+        Girl randomgirl = girlsList.get(randomIndex);
+
+        return getGirlProfile_DB(randomgirl.getUsername(), context);
+
+    }
+
+
+    public static String loadJSONFromAsset(Context context) {
+        String json = null;
+        try {
+            InputStream inputStream = context.getAssets().open("girls_video.json");
+            int size = inputStream.available();
+            byte[] buffer = new byte[size];
+            inputStream.read(buffer);
+            inputStream.close();
+            json = new String(buffer, StandardCharsets.UTF_8);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return json;
+    }
+
+
+    public static Model_Profile getGirlProfile_DB(String userName, Context context) {
+        Model_Profile model_profile = null;
+
+        Cursor cursor = new DatabaseHelper(context, MyApplication.DB_NAME, MyApplication.DB_VERSION, "GirlsProfile").readSingleGirl(userName);
+        if (cursor.moveToFirst()) {
+            model_profile = Utils.readCursor(cursor);
+        }
+        cursor.close();
+
+        return model_profile;
+    }
+
 
 }

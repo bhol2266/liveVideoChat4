@@ -617,11 +617,9 @@ public class ChatScreen_User extends Activity {
                 //Start Recording..
                 ChangeVisiblityMic(true);
                 recordFile = new File(getFilesDir(), UUID.randomUUID().toString() + ".3gp");
-                if (recordFile.canWrite()) {
-                    try {
-                        audioRecorder.start(recordFile.getPath());
-                    } catch (IOException e) {
-                    }
+                try {
+                    audioRecorder.start(recordFile.getPath());
+                } catch (IOException e) {
                 }
 
             }
