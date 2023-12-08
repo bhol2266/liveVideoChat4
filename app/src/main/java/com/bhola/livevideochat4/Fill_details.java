@@ -159,7 +159,7 @@ public class Fill_details extends AppCompatActivity {
         editor.putString("Gender", selectedGender);
         editor.putString("Birthday", Birthday);
         editor.putInt("userId", userId);
-        editor.putInt("coins", 100);
+        editor.putInt("coins", 0);
         editor.apply();
 
 
