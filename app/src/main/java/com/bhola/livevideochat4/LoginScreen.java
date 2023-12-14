@@ -165,7 +165,9 @@ public class LoginScreen extends AppCompatActivity {
                     @Override
                     public void onComplete(@NonNull Task<AuthResult> task) {
                         if (task.isSuccessful()) {
-                            progressDialog.cancel();
+                            if (progressDialog != null) {
+                                progressDialog.cancel();
+                            }
                             ArrayList<String> keyword = new ArrayList<>();
                             checkUserExist(account.getEmail(), account.getDisplayName(), account.getPhotoUrl().toString());
 
@@ -249,7 +251,6 @@ public class LoginScreen extends AppCompatActivity {
     }
 
 
-
     private void saveGalleryImages(final ArrayList<GalleryModel> galleryImages) {
 
         DownloadImageTask downloadImageTask = new DownloadImageTask(LoginScreen.this);
@@ -291,7 +292,7 @@ public class LoginScreen extends AppCompatActivity {
     private void LoginInComplete(String loggedAs, String displayName, String email, String photoUrl) {
         //new login
         MyApplication.userLoggedIn = true;
-        Log.d("dasfsadf", "LoginInComplete: "+loggedAs);
+        Log.d("dasfsadf", "LoginInComplete: " + loggedAs);
         MyApplication.userLoggedIAs = loggedAs;
         finish();
         Intent intent = new Intent(LoginScreen.this, Fill_details.class);
@@ -382,8 +383,7 @@ class DownloadImageTask extends AsyncTask<ArrayList<GalleryModel>, Void, Void> {
 }
 
 
-
- class UserModel {
+class UserModel {
 
     String fullname, email, profilepic, loggedAs, selectedGender, birthday, location, language, bio, intrestedIn;
     boolean streamer;

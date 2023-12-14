@@ -130,6 +130,11 @@ public class Fragment_Calling extends Fragment {
         });
 
         VideoView videoView = view.findViewById(R.id.videoView);
+        videoView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+            }
+        });
         String videoPath = MyApplication.databaseURL_video + "InternationalChatVideos/" + username + ".mp4";
         Log.d("sadfsd", "videoPath: "+videoPath);
 

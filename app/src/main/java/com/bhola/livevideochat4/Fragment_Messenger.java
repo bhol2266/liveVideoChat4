@@ -458,18 +458,16 @@ public class Fragment_Messenger extends Fragment {
 
         try {
             //crashlytics crash
+            MainActivity.unreadMessage_count = count;
             MainActivity.badge_text.setText(String.valueOf(count));
             MainActivity.badge_text.setVisibility(View.VISIBLE);
             MainActivity.badge_text.setBackgroundResource(R.drawable.badge_background);
+
+            if (count == 0) {
+                MainActivity.badge_text.setVisibility(View.GONE);
+            }
         } catch (Exception e) {
         }
-
-        MainActivity.unreadMessage_count = count;
-
-        if (count == 0) {
-            MainActivity.badge_text.setVisibility(View.GONE);
-        }
-
     }
 
 
