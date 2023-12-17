@@ -165,7 +165,7 @@ public class LoginScreen extends AppCompatActivity {
                     @Override
                     public void onComplete(@NonNull Task<AuthResult> task) {
                         if (task.isSuccessful()) {
-                            if (progressDialog != null) {
+                            if (progressDialog != null && progressDialog.isShowing()) {
                                 progressDialog.cancel();
                             }
                             ArrayList<String> keyword = new ArrayList<>();
