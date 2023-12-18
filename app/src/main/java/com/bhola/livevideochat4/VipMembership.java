@@ -14,6 +14,7 @@ import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.InsetDrawable;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.util.Log;
@@ -171,7 +172,10 @@ public class VipMembership extends AppCompatActivity {
             filter.addAction("timer-update");
             filter.addAction("timer-finish");
 
-            registerReceiver(timerUpdateReceiverCheck, filter);
+
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                registerReceiver(timerUpdateReceiverCheck, filter, Context.RECEIVER_NOT_EXPORTED);
+            }
 
         }
 
@@ -637,7 +641,9 @@ public class VipMembership extends AppCompatActivity {
         filter.addAction("timer-update");
         filter.addAction("timer-finish");
 
-        registerReceiver(timerUpdateReceiver, filter);
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            registerReceiver(timerUpdateReceiver, filter, Context.RECEIVER_NOT_EXPORTED);
+        }
 
         Intent intent = new Intent(this, TimerService.class);
         startService(intent);
