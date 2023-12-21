@@ -94,8 +94,10 @@ public class Fragment_Calling extends Fragment {
         mHandler.postDelayed(new Runnable() {
             @Override
             public void run() {
-                endcall.performClick();
-            }
+                try {
+                    endcall.performClick();
+                } catch (Exception e) {
+                }            }
         }, 15000);
     }
 
