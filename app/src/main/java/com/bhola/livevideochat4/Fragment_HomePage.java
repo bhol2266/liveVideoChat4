@@ -149,8 +149,8 @@ public class Fragment_HomePage extends Fragment {
         Random random = new Random();
 
 //get random number between 1000 - 4000
-        int min = 1000;
-        int max = 4000;
+        int min = 300;
+        int max = 1300;
         randomNumber = random.nextInt(max - min + 1) + min;
         current_value = randomNumber;
 

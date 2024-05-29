@@ -231,7 +231,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         values.put("Country", model_profile.getFrom());
         values.put("Languages", model_profile.getLanguages());
         values.put("Age", model_profile.getAge());
-        values.put("InterestedIn", model_profile.getInterestedIn());
+        values.put("InterestedIn", model_profile.getInterested());
         values.put("BodyType", model_profile.getBodyType());
         values.put("Specifics", Utils.encryption(model_profile.getSpecifics()));
         values.put("Ethnicity", model_profile.getEthnicity());
@@ -242,7 +242,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         values.put("coverPhoto", Utils.encryption(model_profile.getCoverPhoto()));
 
         Gson gson = new Gson();
-        String interestsJson = gson.toJson(model_profile.getInterests());
+        String interestsJson = gson.toJson(model_profile.getInterested());
         values.put("Interests", Utils.encryption(interestsJson));
 
         String imagesJson = gson.toJson(model_profile.getImages());

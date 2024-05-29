@@ -36,8 +36,8 @@ import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.airbnb.lottie.LottieAnimationView;
-import com.bhola.Models.GiftItemModel;
 import com.bhola.livevideochat4.Models.ChatItem_ModelClass;
+import com.bhola.livevideochat4.Models.GiftItemModel;
 import com.bhola.livevideochat4.Models.Model_Profile;
 import com.google.android.material.bottomsheet.BottomSheetDialog;
 import com.squareup.picasso.Picasso;
@@ -281,9 +281,9 @@ public class Profile extends AppCompatActivity {
         }
 
         TextView InterestedIn = findViewById(R.id.InterestedIn);
-        InterestedIn.setText(model_profile.getInterestedIn());
+        InterestedIn.setText(model_profile.getInterested());
         LinearLayout InterestedInlayout = findViewById(R.id.InterestedInlayout);
-        if (model_profile.getInterestedIn().length() == 0) {
+        if (model_profile.getInterested().length() == 0) {
             InterestedInlayout.setVisibility(View.GONE);
         }
 

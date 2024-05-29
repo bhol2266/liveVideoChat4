@@ -86,6 +86,8 @@ public class Fill_details extends AppCompatActivity {
                         saveProfileDetails();
                         Toast.makeText(Fill_details.this, "Logged In!", Toast.LENGTH_SHORT).show();
                         startActivity(new Intent(Fill_details.this, MainActivity.class));
+                        finish();
+
                     }
                 }
             }

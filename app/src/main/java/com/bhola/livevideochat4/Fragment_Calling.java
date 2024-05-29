@@ -1,7 +1,12 @@
 package com.bhola.livevideochat4;
 
+
+import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
+import android.database.Cursor;
+import android.graphics.RenderEffect;
+import android.graphics.Shader;
 import android.media.AudioAttributes;
 import android.media.MediaPlayer;
 import android.media.Ringtone;
@@ -23,6 +28,7 @@ import android.widget.VideoView;
 import androidx.fragment.app.Fragment;
 
 import com.airbnb.lottie.LottieAnimationView;
+import com.bhola.livevideochat4.Models.Model_Profile;
 import com.squareup.picasso.Picasso;
 
 import de.hdodenhof.circleimageview.CircleImageView;
@@ -32,7 +38,7 @@ public class Fragment_Calling extends Fragment {
 
     View view;
     Context context;
-    String name,profileImage,username;
+    String name, profileImage, username;
     MediaPlayer mediaPlayer;
     int videoView_Height;
     ImageView endcall;
@@ -40,6 +46,7 @@ public class Fragment_Calling extends Fragment {
     private Ringtone defaultRingtone;
     Handler mHandler;
     Runnable mRunnable;
+    Model_Profile model_profile;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -97,7 +104,8 @@ public class Fragment_Calling extends Fragment {
                 try {
                     endcall.performClick();
                 } catch (Exception e) {
-                }            }
+                }
+            }
         }, 15000);
     }
 
@@ -107,12 +115,13 @@ public class Fragment_Calling extends Fragment {
             startRingTone();
         } catch (Exception e) {
         }
-
+        getUserDetailsFromDB(username);
 
         TextView profileName = view.findViewById(R.id.profileName);
         profileName.setText(name);
-        CircleImageView profileImageView=view.findViewById(R.id.profileImageView);
+        CircleImageView profileImageView = view.findViewById(R.id.profileImageView);
         Picasso.get().load(profileImage).into(profileImageView);
+
 
         TextView message = view.findViewById(R.id.message);
         message.setText(name + " invites you for a video call");
@@ -138,9 +147,9 @@ public class Fragment_Calling extends Fragment {
             }
         });
         String videoPath = MyApplication.databaseURL_video + "InternationalChatVideos/" + username + ".mp4";
-        Log.d("sadfsd", "videoPath: "+videoPath);
+        Log.d("sadfsd", "videoPath: " + videoPath);
 
-        Log.d(MyApplication.TAG, "init: "+videoPath);
+        Log.d(MyApplication.TAG, "init: " + videoPath);
         Uri videoUri = Uri.parse(videoPath);
         videoView.setVideoURI(videoUri);
         videoView.setBackgroundColor(getResources().getColor(R.color.color_333333));
@@ -160,21 +169,70 @@ public class Fragment_Calling extends Fragment {
 
                 float scale = (float) videoView_Height / viewHeight;
 
+                Log.d("onPrepared", "onPrepared: " + scale);
+
                 videoView.setScaleY(scale);
                 videoView.setScaleX(scale);
 
 
                 videoView.start();
+                videoView.setVisibility(View.VISIBLE);
                 new Handler().postDelayed(new Runnable() {
                     @Override
                     public void run() {
                         videoView.setBackgroundResource(android.R.color.transparent);
+                        FrameLayout profileImageView_BG_Flayout = view.findViewById(R.id.profileImageView_BG_Flayout);
+                        profileImageView_BG_Flayout.setVisibility(View.GONE);
                     }
                 }, 1500);
 
 
             }
         });
+
+
+    }
+
+
+    private void getUserDetailsFromDB(String username) {
+
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                Cursor cursor = new DatabaseHelper(context, MyApplication.DB_NAME, MyApplication.DB_VERSION, "GirlsProfile").readSingleGirl(username);
+                if (cursor.moveToFirst()) {
+
+                    model_profile = Utils.readCursor(cursor);
+                }
+                cursor.close();
+                ((Activity) context).runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        new Handler().postDelayed(new Runnable() {
+                            @Override
+                            public void run() {
+                                Log.d("setImageinGridLayout", "run: " + model_profile.getImages());
+                                ImageView profileImageView_BG = view.findViewById(R.id.profileImageView_BG);
+                                if (model_profile.getImages().isEmpty()) {
+                                    Picasso.get().load(profileImage).into(profileImageView_BG);
+                                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+                                        profileImageView_BG.setRenderEffect(RenderEffect.createBlurEffect(10, 10, Shader.TileMode.MIRROR));
+                                    }
+                                    return;
+                                }
+                                Picasso.get().load(model_profile.getImages().get(0)).into(profileImageView_BG);
+                                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+//                                    profileImageView_BG.setRenderEffect(RenderEffect.createBlurEffect(5, 5, Shader.TileMode.MIRROR));
+                                }
+
+
+                            }
+                        }, 200);
+
+                    }
+                });
+            }
+        }).start();
 
 
     }

@@ -13,7 +13,8 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.bhola.Models.GiftItemModel;
+
+import com.bhola.livevideochat4.Models.GiftItemModel;
 
 import java.io.IOException;
 import java.io.InputStream;

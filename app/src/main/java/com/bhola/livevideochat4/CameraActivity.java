@@ -45,6 +45,7 @@ import android.view.Window;
 import android.view.WindowManager;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
+import android.widget.EditText;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -64,9 +65,14 @@ import androidx.core.view.WindowInsetsControllerCompat;
 import androidx.core.widget.ImageViewCompat;
 import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentTransaction;
+import androidx.recyclerview.widget.GridLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 
 import com.airbnb.lottie.LottieAnimationView;
+
+import com.bhola.livevideochat4.Models.GiftItemModel;
 import com.bhola.livevideochat4.Models.Model_Profile;
+import com.google.android.material.bottomsheet.BottomSheetDialog;
 import com.google.common.reflect.TypeToken;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
@@ -81,7 +87,10 @@ import java.io.InputStream;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
 
 import de.hdodenhof.circleimageview.CircleImageView;
 
@@ -109,8 +118,7 @@ public class CameraActivity extends AppCompatActivity {
     public static int currentVideoIndex = 0;
     RelativeLayout progressBarLayout;
     LinearLayout controlsLayout;
-    ImageView taptoReply;
-    View tapToReplyView;
+
     CameraCaptureSession cameraCaptureSession;
     CameraDevice cameraDevice;
     CameraDevice.StateCallback stateCallback = new CameraDevice.StateCallback() {
@@ -151,6 +159,9 @@ public class CameraActivity extends AppCompatActivity {
     Handler callhandler;
     Runnable callRunnable;
 
+    public static TextView send;
+    boolean favourite;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -177,15 +188,160 @@ public class CameraActivity extends AppCompatActivity {
         controlCamera();
         likeBtn();
 
+        ImageView giftBtn = findViewById(R.id.gift);
+        giftBtn.setOnClickListener(view -> {
+            giftBtn();
+        });
+
+        sendNewMessageFunc();
+
+
     }
+
+    private void sendNewMessageFunc() {
+        EditText newMessage = findViewById(R.id.newMessage);
+        ImageView sendBtn = findViewById(R.id.sendBtn);
+        sendBtn.setOnClickListener(view -> {
+            startActivity(new Intent(CameraActivity.this, VipMembership.class));
+            newMessage.setText("");
+
+        });
+    }
+
+    private void plusSignFunc() {
+        ImageView plusSign = findViewById(R.id.plusSign);
+        checkFavouriteStatus(model_profile.getUsername(), plusSign);
+        plusSign.setOnClickListener(view -> {
+            if (!favourite) {
+                String res = new DatabaseHelper(CameraActivity.this, MyApplication.DB_NAME, MyApplication.DB_VERSION, "GirlsProfile").updateLike(model_profile.getUsername(), 1);
+                plusSign.setImageDrawable(getResources().getDrawable(R.drawable.minus));
+                favourite = true;
+                Toast.makeText(this, "Added to favourites", Toast.LENGTH_SHORT).show();
+
+            } else {
+                String res = new DatabaseHelper(CameraActivity.this, MyApplication.DB_NAME, MyApplication.DB_VERSION, "GirlsProfile").updateLike(model_profile.getUsername(), 0);
+                plusSign.setImageDrawable(getResources().getDrawable(R.drawable.plus));
+                favourite = false;
+                Toast.makeText(this, "Removed to favourites", Toast.LENGTH_SHORT).show();
+
+
+            }
+
+        });
+    }
+
+    private void checkFavouriteStatus(String username, ImageView plusSign) {
+
+        Cursor cursor = new DatabaseHelper(CameraActivity.this, MyApplication.DB_NAME, MyApplication.DB_VERSION, "GirlsProfile").readSingleGirl(username);
+        if (cursor.moveToFirst()) {
+            Model_Profile model_profile = Utils.readCursor(cursor);
+            if (model_profile.getLike() == 1) {
+                favourite = true;
+                plusSign.setImageDrawable(getResources().getDrawable(R.drawable.minus));
+            } else {
+                favourite = false;
+                plusSign.setImageDrawable(getResources().getDrawable(R.drawable.plus)); // Set image drawable properly
+
+            }
+        }
+
+    }
+
+
+    private void giftBtn() {
+
+        BottomSheetDialog bottomSheetDialog;
+
+        bottomSheetDialog = new BottomSheetDialog(this);
+        View view = getLayoutInflater().inflate(R.layout.bottomsheetdialog_gifts, null);
+        bottomSheetDialog.setContentView(view);
+        bottomSheetDialog.show();
+
+        send = view.findViewById(R.id.send);
+        send.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                rechargeDialog(view.getContext());
+
+            }
+        });
+        TextView coinCount = view.findViewById(R.id.coin);
+        coinCount.setText(String.valueOf(MyApplication.coins));
+        TextView topup = view.findViewById(R.id.topup);
+        topup.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                startActivity(new Intent(CameraActivity.this, VipMembership.class));
+            }
+        });
+        TextView problem = findViewById(R.id.problem);
+        RecyclerView recyclerView = view.findViewById(R.id.recyclerView);
+
+        String[] items = {"Rose", "Penghua", "TeddyBear", "Ring", "CrystalShoes", "LaserBall", "Crown", "Ferrari", "Motorcycle", "Yacht", "Bieshu", "Castle"};
+
+        List<GiftItemModel> itemList = new ArrayList<>();
+
+        for (int i = 0; i < items.length; i++) {
+            String item = items[i];
+            int coin = 99 + (i * 100); // Calculate the "coin" value based on the index
+
+            GiftItemModel giftItemModel = new GiftItemModel(item, coin, false);
+            Map<String, Object> itemMap = new HashMap<>();
+            itemMap.put("gift", item);
+            itemMap.put("coin", coin);
+
+            itemList.add(giftItemModel);
+        }
+
+        GiftItemAdapter giftItemAdapter = new GiftItemAdapter(CameraActivity.this, itemList);
+        GridLayoutManager layoutManager = new GridLayoutManager(CameraActivity.this, 4);
+        recyclerView.setLayoutManager(layoutManager);
+        recyclerView.setAdapter(giftItemAdapter);
+
+    }
+
+    public static void rechargeDialog(Context context) {
+
+        AlertDialog recharge_dialog = null;
+
+        final androidx.appcompat.app.AlertDialog.Builder builder = new androidx.appcompat.app.AlertDialog.Builder(context);
+        LayoutInflater inflater = LayoutInflater.from(context);
+        View promptView = inflater.inflate(R.layout.dialog_recharge, null);
+        builder.setView(promptView);
+        builder.setCancelable(true);
+
+        TextView recharge = promptView.findViewById(R.id.recharge);
+        TextView cancel = promptView.findViewById(R.id.cancel);
+
+
+        recharge_dialog = builder.create();
+        recharge_dialog.show();
+
+
+        recharge.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                context.startActivity(new Intent(context, VipMembership.class));
+            }
+        });
+
+        AlertDialog finalRecharge_dialog = recharge_dialog;
+        cancel.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                finalRecharge_dialog.dismiss();
+            }
+        });
+
+        ColorDrawable back = new ColorDrawable(Color.TRANSPARENT);
+        InsetDrawable inset = new InsetDrawable(back, 20);
+        recharge_dialog.getWindow().setBackgroundDrawable(inset);
+
+    }
+
 
     private void likeBtn() {
         ImageView heart = findViewById(R.id.heart);
-        taptoReply = findViewById(R.id.taptoReply);
-        tapToReplyView = findViewById(R.id.tapToReplyView);
-
-        Animation taptoReply_anim = AnimationUtils.loadAnimation(this, R.anim.taptoreply_anim);
-        taptoReply.startAnimation(taptoReply_anim);
 
 
         Animation pulse = AnimationUtils.loadAnimation(this, R.anim.breathing_anim);
@@ -200,7 +356,6 @@ public class CameraActivity extends AppCompatActivity {
 
 
                 ImageViewCompat.setImageTintList(heart, null);
-                taptoReply.setVisibility(View.GONE);
                 heart.setImageResource(R.drawable.heart_liked);
                 heart.clearAnimation();
                 LottieAnimationView heart_lottie = findViewById(R.id.heart_lottie);
@@ -335,7 +490,6 @@ public class CameraActivity extends AppCompatActivity {
         ImageViewCompat.setImageTintList(heart, ColorStateList.valueOf(tintColor));
         ImageViewCompat.setImageTintMode(heart, PorterDuff.Mode.SRC_IN);
 
-        taptoReply.setVisibility(View.VISIBLE);
         ImageView speaker = findViewById(R.id.speaker);
         speaker.setImageResource(R.drawable.speaker_off);
 
@@ -452,7 +606,6 @@ public class CameraActivity extends AppCompatActivity {
 
                         progressBarLayout.setVisibility(View.GONE);
                         controlsLayout.setVisibility(View.VISIBLE);
-                        tapToReplyView.setVisibility(View.GONE);
                         resetButtons();
 
 
@@ -482,8 +635,13 @@ public class CameraActivity extends AppCompatActivity {
                             @Override
                             public void run() {
 
+                                plusSignFunc();
+
                                 TextView profileName = findViewById(R.id.profileName);
                                 profileName.setText(model_profile.getName());
+
+                                TextView countryName = findViewById(R.id.countryName);
+                                countryName.setText(model_profile.getFrom());
                                 CircleImageView profileImage = findViewById(R.id.profileImage);
 
                                 profileName.setOnClickListener(new View.OnClickListener() {
@@ -531,7 +689,6 @@ public class CameraActivity extends AppCompatActivity {
                     videoView.stopPlayback();
                     progressBarLayout.setVisibility(View.VISIBLE);
                     controlsLayout.setVisibility(View.GONE);
-                    tapToReplyView.setVisibility(View.VISIBLE);
                     String videoPath = MyApplication.databaseURL_video + "InternationalChatVideos/" + girlsList.get(currentVideoIndex).getUsername() + ".mp4";
 
 
@@ -576,7 +733,6 @@ public class CameraActivity extends AppCompatActivity {
                     videoView.stopPlayback();
                     progressBarLayout.setVisibility(View.VISIBLE);
                     controlsLayout.setVisibility(View.GONE);
-                    tapToReplyView.setVisibility(View.VISIBLE);
                     String videoPath = MyApplication.databaseURL_video + "InternationalChatVideos/" + girlsList.get(currentVideoIndex).getUsername() + ".mp4";
 
 
@@ -1112,16 +1268,7 @@ public class CameraActivity extends AppCompatActivity {
     private void actionbar() {
         controlsLayout = findViewById(R.id.controlsLayout);
 
-        ImageView warningSign = findViewById(R.id.warningSign);
         ImageView menuDots = findViewById(R.id.menuDots);
-
-
-        warningSign.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                blockUserDialog();
-            }
-        });
 
         menuDots.setOnClickListener(new View.OnClickListener() {
             @Override

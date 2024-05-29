@@ -6,12 +6,16 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.Color;
 import android.graphics.Paint;
+import android.graphics.drawable.ColorDrawable;
+import android.graphics.drawable.InsetDrawable;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.LayoutInflater;
 import android.view.View;
 import android.view.WindowManager;
 import android.widget.LinearLayout;
@@ -294,15 +298,83 @@ public class LoginScreen extends AppCompatActivity {
         MyApplication.userLoggedIn = true;
         Log.d("dasfsadf", "LoginInComplete: " + loggedAs);
         MyApplication.userLoggedIAs = loggedAs;
-        finish();
         Intent intent = new Intent(LoginScreen.this, Fill_details.class);
         intent.putExtra("loggedAs", loggedAs);
         intent.putExtra("nickName", displayName);
         intent.putExtra("email", email);
         intent.putExtra("photoUrl", photoUrl);
         startActivity(intent);
+        if (loggedAs.equals("Google") && progressDialog.isShowing()) {
+            progressDialog.dismiss();
+        }
     }
 
+
+    private void exit_dialog() {
+
+        final AlertDialog.Builder builder = new AlertDialog.Builder(LoginScreen.this);
+        LayoutInflater inflater = LayoutInflater.from(getApplicationContext());
+        View promptView = inflater.inflate(R.layout.dialog_exit_app, null);
+        builder.setView(promptView);
+        builder.setCancelable(true);
+
+        TextView exit = promptView.findViewById(R.id.confirm);
+        TextView cancel = promptView.findViewById(R.id.cancel);
+
+
+        AlertDialog exitDialog = builder.create();
+        exitDialog.show();
+
+
+        exit.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+
+                if (MyApplication.exit_Refer_appNavigation.equals("active") && MyApplication.Login_Times < 2 && MyApplication.Refer_App_url2.length() > 10) {
+
+                    Intent j = new Intent(Intent.ACTION_VIEW);
+                    j.setData(Uri.parse(MyApplication.Refer_App_url2));
+                    try {
+                        startActivity(j);
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+                    finishAffinity();
+                    System.exit(0);
+                    finish();
+                    exitDialog.dismiss();
+
+                } else {
+
+                    finishAffinity();
+                    finish();
+                    System.exit(0);
+                    finish();
+                    exitDialog.dismiss();
+
+                }
+            }
+        });
+
+        cancel.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                exitDialog.cancel();
+            }
+        });
+
+
+        ColorDrawable back = new ColorDrawable(Color.TRANSPARENT);
+        InsetDrawable inset = new InsetDrawable(back, 20);
+        exitDialog.getWindow().setBackgroundDrawable(inset);
+
+    }
+
+    @Override
+    public void onBackPressed() {
+        exit_dialog();
+
+    }
 
 }
 
