@@ -754,10 +754,7 @@ public class VipMembership extends AppCompatActivity {
 
         Intent intent = new Intent(this, NotificationReceiver.class);
 
-        SharedPreferences sh = VipMembership.this.getSharedPreferences("UserInfo", MODE_PRIVATE);
-        String fullname = sh.getString("name", "not set");
-
-
+        String fullname = MyApplication.userModel.getFullname();
         intent.putExtra("USERNAME", fullname); // Pass the data here
         PendingIntent pendingIntent = PendingIntent.getBroadcast(this, REQUEST_CODE, intent, PendingIntent.FLAG_IMMUTABLE);
 
