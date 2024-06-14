@@ -1106,7 +1106,7 @@ public class ChatScreen_User extends Activity {
         });
 
         ImageView profileImage = findViewById(R.id.profileImage);
-        Picasso.get().load(modelClass.getProfileImage()).into(profileImage);
+        Picasso.get().load(modelClass.getProfileImage()).fit().into(profileImage);
         viewProfile.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {

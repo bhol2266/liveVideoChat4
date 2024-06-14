@@ -650,7 +650,7 @@ public class CameraActivity extends AppCompatActivity {
                                         profileImage.performClick();
                                     }
                                 });
-                                Picasso.get().load(model_profile.getProfilePhoto()).into(profileImage);
+                                Picasso.get().load(model_profile.getProfilePhoto().replace("profile","profile_original")).fit().into(profileImage);
                                 profileImage.setOnClickListener(new View.OnClickListener() {
                                     @Override
                                     public void onClick(View view) {

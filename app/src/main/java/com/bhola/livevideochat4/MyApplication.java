@@ -39,8 +39,8 @@ public class MyApplication extends Application {
     public static String Refer_App_url2 = "https://play.google.com/store/apps/developer?id=UK+DEVELOPERS";
     public static String Ads_State = "inactive";
     public static String App_updating = "active";
-    public static String databaseURL_video = "https://bhola2266.ap-south-1.linodeobjects.com//"; //default
-    public static String databaseURL_images = "https://bucket2266.blr1.digitaloceanspaces.com/"; //default
+    public static String databaseURL_video = "https://pub-46cdeefeaf774247ab99232ab1ebaa66.r2.dev/"; //default
+    public static String databaseURL_images = "https://pub-46cdeefeaf774247ab99232ab1ebaa66.r2.dev/"; //default
 
     public static String exit_Refer_appNavigation = "inactive";
     public static String Notification_ImageURL = "https://hotdesipics.co/wp-content/uploads/2022/06/Hot-Bangla-Boudi-Ki-Big-Boobs-Nangi-Selfies-_002.jpg";
@@ -50,7 +50,7 @@ public class MyApplication extends Application {
     //sqlDB
     public static String DB_NAME = "profiles";
     public static int DB_VERSION = 1;//manual set
-    public static int DB_VERSION_INSIDE_TABLE = 1; //manual set
+    public static int DB_VERSION_INSIDE_TABLE = 2; //manual set
 
 
     //Google login

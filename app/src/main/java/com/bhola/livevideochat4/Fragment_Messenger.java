@@ -525,7 +525,7 @@ class MessengeItemsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
         String formattedTime = dateFormat.format(currentTime);
         userItem_viewholder.messageTime.setText(formattedTime);
 
-        Picasso.get().load(MyApplication.databaseURL_images + modelClass.getProfileImage()).into(userItem_viewholder.profileUrl);
+        Picasso.get().load(modelClass.getProfileImage().replace("profile","profile_original")).fit().into(userItem_viewholder.profileUrl);
 
         userItem_viewholder.chatItemClick.setOnClickListener(new View.OnClickListener() {
             @Override

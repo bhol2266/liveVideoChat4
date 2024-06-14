@@ -663,7 +663,7 @@ class ProfileGirlImageAdapter extends RecyclerView.Adapter<ProfileGirlImageAdapt
         Map<String, String> imageItem = imageList.get(position);
 //        holder.bind(imageItem);
 
-        Picasso.get().load(imageItem.get("url")).resize(150, 0) // Set the width in pixels and let Picasso calculate the height
+        Picasso.get().load(imageItem.get("url")).fit().centerCrop() // Set the width in pixels and let Picasso calculate the height
                 .into(holder.imageView);
 
         int widthInPixels = holder.imageView.getWidth(); // Get the current width
